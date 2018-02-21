@@ -1,0 +1,5 @@
+W:\poteat\CBL\mergePDBSet\output\trueSheet4.pdb
+W:\poteat\CBL\mergePDBSet\output\trueSheet5.pdb
+W:\poteat\CBL\mergePDBSet\output\trueSheet6.pdb
+W:\poteat\CBL\mergePDBSet\output\trueSheet7.pdb
+W:\poteat\CBL\mergePDBSet\output\trueSheet8.pdb
