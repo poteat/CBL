@@ -15,7 +15,7 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="ApplyConvolution.cpp">
+    <ClCompile Include="applyConvolution.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
