@@ -130,6 +130,40 @@ namespace cbl
 			}
 		}
 
+		T min()
+		{
+			return *std::min_element(data.begin(), data.end());
+		}
+
+		T max()
+		{
+			return *std::max_element(data.begin(), data.end());
+		}
+
+		T mean()
+		{
+			T sum = 0;
+			auto f = [&sum](T x) {sum += x; };
+			std::for_each(data.begin(), data.end(), f);
+			sum /= data.size();
+			return sum;
+		}
+
+		T variance()
+		{
+			T mean = mean();
+			T square_sum = 0;
+			auto f = [&](T x) {square_sum += pow(mean - x, 2); };
+			std::for_each(data.begin(), data.end(), f);
+			square_sum /= data.size();
+			return square_sum;
+		}
+
+		T standard_deviation()
+		{
+			return sqrt(variance());
+		}
+
 		void rotate(real _x, real _y, real _z, real ux, real uy, real uz, real theta)
 		{
 			Vector3f w = { ux, uy, uz }; // rotation axis

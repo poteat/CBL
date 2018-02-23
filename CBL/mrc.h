@@ -147,6 +147,72 @@ namespace cbl
 			std::cout << "Origin: " << header.xorigin << " " << header.yorigin << " " << header.zorigin;
 		}
 
+		void applyDeviationThreshold(real multiplier)
+		{
+			real threshold = multiplier * map.standard_deviation();
+			applyThreshold(threshold);
+		}
+
+		// Given a mrc that has been thresholded, only include voxels which have an empty neighbor in their
+		// 26-neighborhood
+		void setHollowBoundary()
+		{
+			auto equal_zero = [](real x) {return x == 0; };
+
+			auto has_zero_value = [&](std::vector<real> v, real d)
+			{
+				return d * std::any_of(v.begin(), v.end(), equal_zero);
+			};
+
+			apply(3, 3, 3, has_zero_value);
+		}
+
+		// Given a kernel dimension, and a "folding" function, apply the function to all kernel
+		// groups of the image
+		void apply(size_t nx, size_t ny, size_t nz, std::function<real(std::vector<real>, real)> f)
+		{
+			// Confirm that kernel size is odd
+			assert(nx % 2);
+			assert(ny % 2);
+			assert(nz % 2);
+
+			cube<real> temp(header.nx, header.ny, header.nz);
+
+			size_t mid_x = nx / 2;
+			size_t mid_y = ny / 2;
+			size_t mid_z = nz / 2;
+
+			// Loop through all kernel groups
+
+			for (size_t i = 0; i < header.nx; i++)
+			{
+				for (size_t j = 0; j < header.ny; j++)
+				{
+					for (size_t k = 0; k < header.nz; k++)
+					{
+						std::vector<real> kernel_function_input;
+
+						for (size_t I = 0; I < nx; I++)
+						{
+							for (size_t J = 0; J < ny; J++)
+							{
+								for (size_t K = 0; K < nz; K++)
+								{
+									real d = map(i + I - mid_x, j + J - mid_y, k + K - mid_z);
+									
+									kernel_function_input.push_back(d);
+								}
+							}
+						}
+
+						temp(i, j, k) = f(kernel_function_input, map(i, j, k));
+					}
+				}
+			}
+
+			map = temp;
+		}
+
 		void apply(std::function<real(real)> f)
 		{
 			for (size_t i = 0; i < header.nx; i++)
@@ -202,16 +268,7 @@ namespace cbl
 				}
 			}
 
-			for (size_t i = 0; i < header.nx; i++)
-			{
-				for (size_t j = 0; j < header.ny; j++)
-				{
-					for (size_t k = 0; k < header.nz; k++)
-					{
-						map(i, j, k) = temp(i, j, k);
-					}
-				}
-			}
+			map = temp;
 		}
 
 		// Sets elements on border to zero.  How many layers to remove is "layers".  0 "layers"
