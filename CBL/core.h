@@ -151,9 +151,9 @@ namespace cbl
 
 		T variance()
 		{
-			T mean = mean();
+			T mean_val = mean();
 			T square_sum = 0;
-			auto f = [&](T x) {square_sum += pow(mean - x, 2); };
+			auto f = [&](T x) {square_sum += pow(mean_val - x, 2); };
 			std::for_each(data.begin(), data.end(), f);
 			square_sum /= data.size();
 			return square_sum;

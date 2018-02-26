@@ -1,0 +1,6 @@
+set dgrid3d ,,16
+set xlabel "parameterized t 0->1"
+set ylabel "threshold
+set zlabel "score"
+set style data lines
+splot "scatter.dat"

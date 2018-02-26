@@ -11,7 +11,9 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "mergePDBSet", "mergePDBSet\
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "cropMRCFromPDB", "cropMRCFromPDB\cropMRCFromPDB.vcxproj", "{F66FB0AB-958A-4BBE-B59E-A5C058DC720A}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ApplyConvolution", "ApplyConvolution\ApplyConvolution.vcxproj", "{5A7DE24A-2C71-4905-A9A9-9989C289F57C}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "applyConvolution", "ApplyConvolution\ApplyConvolution.vcxproj", "{5A7DE24A-2C71-4905-A9A9-9989C289F57C}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "qualityQuantifier", "qualityQuantifier\qualityQuantifier.vcxproj", "{702D65A9-04CA-4D4D-ADAE-BC108F7937A9}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -53,6 +55,12 @@ Global
 		{5A7DE24A-2C71-4905-A9A9-9989C289F57C}.Release|Win32.Build.0 = Release|Win32
 		{5A7DE24A-2C71-4905-A9A9-9989C289F57C}.Release|x64.ActiveCfg = Release|x64
 		{5A7DE24A-2C71-4905-A9A9-9989C289F57C}.Release|x64.Build.0 = Release|x64
+		{702D65A9-04CA-4D4D-ADAE-BC108F7937A9}.Debug|Win32.ActiveCfg = Debug|Win32
+		{702D65A9-04CA-4D4D-ADAE-BC108F7937A9}.Debug|Win32.Build.0 = Debug|Win32
+		{702D65A9-04CA-4D4D-ADAE-BC108F7937A9}.Debug|x64.ActiveCfg = Debug|Win32
+		{702D65A9-04CA-4D4D-ADAE-BC108F7937A9}.Release|Win32.ActiveCfg = Release|Win32
+		{702D65A9-04CA-4D4D-ADAE-BC108F7937A9}.Release|Win32.Build.0 = Release|Win32
+		{702D65A9-04CA-4D4D-ADAE-BC108F7937A9}.Release|x64.ActiveCfg = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
