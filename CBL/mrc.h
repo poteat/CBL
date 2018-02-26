@@ -347,23 +347,6 @@ namespace cbl
 			}
 		}
 
-		void applyDeviation(real threshold)
-		{
-			for (size_t i = 0; i < header.nx; i++)
-			{
-				for (size_t j = 0; j < header.ny; j++)
-				{
-					for (size_t k = 0; k < header.nz; k++)
-					{
-						if (map(i, j, k) < threshold)
-						{
-							map(i, j, k) = 0;
-						}
-					}
-				}
-			}
-		}
-
 		std::tuple<mrc, mrc> crop(pdb& pdb, real cropping_dist)
 		{
 			mrc near_map(*this);
