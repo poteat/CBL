@@ -228,6 +228,18 @@ namespace cbl
 			}
 		}
 
+		point pdbSpaceVoxel(size_t n)
+		{
+			point voxel = map.point(n);
+
+			// Compute "real-space" coordinates from (i,j,k)
+			voxel.x = voxel.x * scale + header.xorigin;
+			voxel.y = voxel.y * scale + header.yorigin;
+			voxel.z = voxel.z * scale + header.zorigin;
+
+			return voxel;
+		}
+
 		void apply(cube<real> &kernel)
 		{
 			// Confirm that kernel size is odd
