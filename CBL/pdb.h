@@ -5,6 +5,7 @@
 #include <string>
 #include <assert.h>
 #include <iomanip>
+#include <iostream>
 
 #include "core.h"
 

@@ -58,6 +58,11 @@ namespace cbl
 		real x, y, z;
 	};
 
+	real distSq(point &a, point &b)
+	{
+		return pow(a.x - b.x, 2) + pow(a.y - b.y, 2) + pow(a.z - b.z, 2);
+	}
+
 	template <class T>
 	class cube
 	{
@@ -80,6 +85,25 @@ namespace cbl
 				data[0] = 0;
 				return data[0];
 			}
+		}
+
+		T &operator[](size_t i)
+		{
+			return data[i];
+		}
+
+		point point(size_t n)
+		{
+			size_t i = n % _nx;
+			size_t k = n / _nx / _ny;
+			size_t j = (n - _nx * _ny * k - i) / _nx;
+
+			return point::point((real)i, (real)j, (real)k);
+		}
+
+		size_t size()
+		{
+			return _nx*_ny*_nz;
 		}
 
 		cube(std::string file_name)
