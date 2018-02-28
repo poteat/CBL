@@ -25,7 +25,7 @@ int main(int argc, char* argv[])
 	auto avg = [](std::vector<cbl::real> v)
 	{
 		cbl::real sum;
-		auto add = [&sum](auto x) {sum += x; };
+		auto add = [&sum](cbl::real x) {sum += x; };
 		std::for_each(v.begin(), v.end(), add);
 		return sum / v.size();
 	};
