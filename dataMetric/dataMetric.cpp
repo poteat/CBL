@@ -31,6 +31,11 @@ void applyLineData(mrc map, pdb structure, cbl::real deviation, std::string& dat
 
 	data += out.str();
 }
+void cylinderCutOut(mrc map, pdb structure)
+{
+	//Chop out the density around helixes using a cylinder of 5-6 angstroms
+
+}
 
 int main(int argc, char* argv[])
 {
