@@ -147,9 +147,22 @@ namespace cbl
 			std::cout << "Origin: " << header.xorigin << " " << header.yorigin << " " << header.zorigin;
 		}
 
+		void normalize()
+		{
+			real min = map.min();
+			real max = map.max();
+
+			for (int i = 0; i < map.size(); i++)
+			{
+				map[i] = (map[i] - min) / (max - min);
+			}
+		}
+
 		void applyDeviationThreshold(real multiplier)
 		{
 			real threshold = multiplier * map.standard_deviation();
+
+			std::cout << threshold << std::endl;
 			applyThreshold(threshold);
 		}
 

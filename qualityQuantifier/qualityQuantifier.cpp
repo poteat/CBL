@@ -1,10 +1,35 @@
 #include <assert.h>
 #include <string>
 #include <functional>
+#include <sstream>
 
 #include "axis.h"
 
 using namespace cbl;
+
+void applyLineData(mrc map, pdb structure, cbl::real deviation, std::string& data)
+{
+	axis line(structure);
+
+	map.applyDeviationThreshold(deviation);
+	map.setHollowBoundary();
+
+	auto avg = [](std::vector<cbl::real> v)
+	{
+		cbl::real sum = 0;
+		auto add = [&sum](cbl::real x) {sum += x; };
+		std::for_each(v.begin(), v.end(), add);
+		return sum / v.size();
+	};
+
+	line.calcError(map, avg);
+
+	std::ostringstream out;
+
+	line.write(out, deviation);
+
+	data += out.str();
+}
 
 int main(int argc, char* argv[])
 {
@@ -13,25 +38,22 @@ int main(int argc, char* argv[])
 
 	mrc map(argv[1]);
 	pdb structure(argv[2]);
+	std::string data_result;
 
-	axis line(structure);
+	map.normalize();
 
-	map.applyDeviationThreshold(2);
-	map.setHollowBoundary();
-
-	auto avg = [](std::vector<cbl::real> v)
+	for (float t = 0.2; t <= 2; t += 0.2)
 	{
-		cbl::real sum;
-		auto add = [&sum](auto x) {sum += x; };
-		std::for_each(v.begin(), v.end(), add);
-		return sum / v.size();
-	};
+		applyLineData(map, structure, t, data_result);
+	}
 
-	line.calcError(map, avg);
-	// line.removeZeroErrors();
-	line.write("scatter.dat", 2);
+	std::ofstream out_file("scatter.dat");
 
-	system("pause");
+	out_file << data_result << std::endl;
+
+	out_file.close();
+
+	system("display_scatter_plot.bat");
 
 	return 0;
 }

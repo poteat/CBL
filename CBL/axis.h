@@ -1,5 +1,7 @@
 #pragma once
 
+#include <sstream>
+
 #include "core.h"
 #include "pdb.h"
 #include "mrc.h"
@@ -15,7 +17,7 @@ namespace cbl
 		{
 			for (size_t i = 0; i < p.size(); i++)
 			{
-				points.emplace_back(p[i]);
+				points.push_back((point)p[i]);
 			}
 
 			error.resize(p.size());
@@ -34,6 +36,15 @@ namespace cbl
 			}
 		}
 
+		void write(std::ostringstream& out, real threshold)
+		{
+			for (size_t i = 0; i < points.size(); i++)
+			{
+				real t = (real)i / (real)(points.size() - 1);
+				out << t << " " << threshold << " " << error[i] << std::endl;
+			}
+		}
+
 		void calcError(mrc &m, std::function<real(std::vector<real>)> fold)
 		{
 			// For each voxel, find the closest pdb point, then register that error with that point
@@ -46,23 +57,34 @@ namespace cbl
 				point voxel = m.pdbSpaceVoxel(i);
 				real density = m.map[i];
 
-				real min_dist = Infinity;
-				size_t min_point = 0;
-
-				for (size_t j = 0; j < points.size(); j++)
+				if (density > 0)
 				{
-					point p = points[j];
+					real min_dist = Infinity;
+					size_t min_point = 0;
 
-					real square_dist = distSq(voxel, p);
-
-					if (square_dist < min_dist)
+					for (size_t j = 0; j < points.size(); j++)
 					{
-						min_dist = square_dist;
-						min_point = j;
-					}
-				}
+						point p = points[j];
 
-				error_registrations[min_point].push_back(min_dist);
+						// std::cout << p.x << std::endl;
+
+						real square_dist = distSq(voxel, p);
+
+						// std::cout << voxel.x << " " << p.x << std::endl;
+
+						// std::cout << square_dist << std::endl;
+
+						if (square_dist < min_dist)
+						{
+							min_dist = square_dist;
+							min_point = j;
+						}
+					}
+
+					min_dist = sqrt(min_dist);
+
+					error_registrations[min_point].push_back(min_dist);
+				}
 			}
 
 			// Apply fold on error registrations to get actual error per point

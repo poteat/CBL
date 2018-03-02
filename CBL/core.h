@@ -14,6 +14,7 @@ namespace cbl
 	using namespace Eigen;
 
 	typedef float real;
+	real Infinity = std::numeric_limits<real>::max();
 
 	class mrc;
 	class off;
