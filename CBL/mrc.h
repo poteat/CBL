@@ -152,7 +152,7 @@ namespace cbl
 			real min = map.min();
 			real max = map.max();
 
-			for (int i = 0; i < map.size(); i++)
+			for (size_t i = 0; i < map.size(); i++)
 			{
 				map[i] = (map[i] - min) / (max - min);
 			}
@@ -367,24 +367,6 @@ namespace cbl
 						{
 							map(i, j, k) = 0;
 						}
-					}
-				}
-			}
-		}
-
-		void normalize()
-		{
-			double upper = map.max();
-			double lower = map.min();
-
-			for (size_t i = 0; i < header.nx; i++)
-			{
-				for (size_t j = 0; j < header.ny; j++)
-				{
-					for (size_t k = 0; k < header.nz; k++)
-					{
-						real m = map(i, j, k);
-						m = (m - lower) / (upper - lower);
 					}
 				}
 			}
