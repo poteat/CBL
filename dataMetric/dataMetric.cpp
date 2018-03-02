@@ -58,19 +58,8 @@ int main(int argc, char* argv[])
 
 	//take regular intervals of the threshold from 1 - 0.5
 	//continue running smaller thresholds, if voxels are greater than a certain amount, discount them and stop decreasing
-	double threshold;
-	threshold = 1.0;
-
-	for (int i = 20; i > -1; i--)
-	{
-		map.applyThreshold(threshold);
-		threshold -= 0.05;
-
 		//take slices of helixes to form circles of density and find av distance from center, and then av distance from true axis
 		//use new CBL function for the border mrc points
-
-	}
-
 	//At the end, output best threshold into file along with helix and beta sheet comparisons
 
 
