@@ -13,7 +13,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "cropMRCFromPDB", "cropMRCFr
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "applyConvolution", "ApplyConvolution\ApplyConvolution.vcxproj", "{5A7DE24A-2C71-4905-A9A9-9989C289F57C}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "qualityQuantifier", "qualityQuantifier\qualityQuantifier.vcxproj", "{702D65A9-04CA-4D4D-ADAE-BC108F7937A9}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "dataMetric", "dataMetric\dataMetric.vcxproj", "{702D65A9-04CA-4D4D-ADAE-BC108F7937A9}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
