@@ -34,14 +34,13 @@ void applyLineData(mrc map, pdb structure, cbl::real deviation, std::string& dat
 void cylinderCutOut(mrc map, pdb structure)
 {
 	//Chop out the density around helixes using a cylinder of 5-6 angstroms
+	cbl::real cropping_dist = (cbl::real) std::stod();
 
+	mrc near, far;
 
+	std::tie(near, far) = map.crop(structure, cropping_dist);
 
-
-
-
-
-
+	map = near;
 }
 double score(mrc map, pdb structure, float threshold)
 {
