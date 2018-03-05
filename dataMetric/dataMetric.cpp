@@ -35,6 +35,26 @@ void cylinderCutOut(mrc map, pdb structure)
 {
 	//Chop out the density around helixes using a cylinder of 5-6 angstroms
 
+
+
+
+
+
+
+
+}
+double score(mrc map, pdb structure, float threshold)
+{
+	double quantification = 0;
+
+
+
+
+
+
+
+
+	return quantification;
 }
 
 int main(int argc, char* argv[])
@@ -45,6 +65,12 @@ int main(int argc, char* argv[])
 	mrc map(argv[1]);
 	pdb structure(argv[2]);
 	std::string data_result;
+
+	//cut out cylinders
+	cylinderCutOut(map, structure);
+
+	//output new mrc
+	map.write("generatedMRC.mrc");
 
 	map.normalize();
 
@@ -60,6 +86,25 @@ int main(int argc, char* argv[])
 	out_file.close();
 
 	system("display_scatter_plot.bat");
+
+	//run quantification on different thresholds up to 1
+		//find variance and average the bottom 50%
+
+	std::ofstream score_out_file("quantification.dat");
+
+	double quantification = 0;
+	int loopy = 0;
+
+	for (float threshold = 0; threshold <= 1; threshold+= 0.1)
+	{
+		double threshold_score = score(map, structure, threshold);
+		quantification += threshold_score;
+		loopy++;
+		score_out_file << threshold << "\t" << threshold_score << std::endl;
+	}
+
+	quantification = quantification / loopy;
+	score_out_file << "----------------------------------------\n" << "Final Score: " << quantification;
 
 	return 0;
 }
