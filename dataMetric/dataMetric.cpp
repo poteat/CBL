@@ -45,6 +45,7 @@ void cylinderCutOut(mrc map, pdb structure)
 }
 double score(mrc map, pdb structure, float threshold)
 {
+	//find variance and average the bottom 50%
 	double quantification = 0;
 
 
@@ -66,10 +67,8 @@ int main(int argc, char* argv[])
 	pdb structure(argv[2]);
 	std::string data_result;
 
-	//cut out cylinders
 	cylinderCutOut(map, structure);
 
-	//output new mrc
 	map.write("generatedMRC.mrc");
 
 	map.normalize();
@@ -86,9 +85,6 @@ int main(int argc, char* argv[])
 	out_file.close();
 
 	system("display_scatter_plot.bat");
-
-	//run quantification on different thresholds up to 1
-		//find variance and average the bottom 50%
 
 	std::ofstream score_out_file("quantification.dat");
 
