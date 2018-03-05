@@ -8,7 +8,7 @@
 
 using namespace cbl;
 
-void applyLineData(mrc map, pdb structure, cbl::real deviation, std::string& data)
+cbl::real applyLineData(mrc map, pdb structure, cbl::real deviation, std::string& data)
 {
 	axis line(structure);
 
@@ -23,6 +23,14 @@ void applyLineData(mrc map, pdb structure, cbl::real deviation, std::string& dat
 		return sum / v.size();
 	};
 
+	auto variance = [](std::vector<cbl::real> v, cbl::real avg)
+	{
+		cbl::real variance_sum = 0;
+		auto add = [&](cbl::real x) {variance_sum += pow((x - avg), 2); };
+		std::for_each(v.begin(), v.end(), add);
+		return (pow((variance_sum / v.size()), .5));
+	};
+
 	line.calcError(map, avg);
 
 	std::ostringstream out;
@@ -30,31 +38,21 @@ void applyLineData(mrc map, pdb structure, cbl::real deviation, std::string& dat
 	line.write(out, deviation);
 
 	data += out.str();
+
+	return variance(line.error, avg(line.error));
 }
+
 void cylinderCutOut(mrc map, pdb structure)
 {
 	//Chop out the density around helixes using a cylinder of 5-6 angstroms
-	cbl::real cropping_dist = (cbl::real) std::stod();
+	std::string dist = "5";
+	cbl::real cropping_dist = (cbl::real) std::stod(dist);
 
 	mrc near, far;
 
 	std::tie(near, far) = map.crop(structure, cropping_dist);
 
 	map = near;
-}
-double score(mrc map, pdb structure, float threshold)
-{
-	//find variance and average the bottom 50%
-	double quantification = 0;
-
-
-
-
-
-
-
-
-	return quantification;
 }
 
 int main(int argc, char* argv[])
@@ -72,10 +70,31 @@ int main(int argc, char* argv[])
 
 	map.normalize();
 
+	std::ofstream score_out_file("quantification.dat");
+	std::vector<double>threshold_score;
+	int loopy = 0;
+	double final_variance = 0;
+
 	for (float t = 0.2f; t <= 2.0f; t += 0.2f)
 	{
-		applyLineData(map, structure, t, data_result);
+		threshold_score.push_back(applyLineData(map, structure, t, data_result));
+		score_out_file << t << "\t" << threshold_score[loopy] << std::endl;
+		loopy++;
 	}
+
+	score_out_file << "\n\nUtilized scores\n";
+	std::sort(threshold_score.begin(), threshold_score.end());
+	for (int i = 0; i <= (loopy / 2); i++)
+	{
+		final_variance += threshold_score[i];
+		score_out_file <<threshold_score[i] << std::endl;
+	}
+
+	final_variance = (final_variance / (loopy / 2));
+
+	score_out_file << "----------------------------------------\n" << "Final Score: " << final_variance;
+	score_out_file.close();
+
 
 	std::ofstream out_file("scatter.dat");
 
@@ -84,22 +103,6 @@ int main(int argc, char* argv[])
 	out_file.close();
 
 	system("display_scatter_plot.bat");
-
-	std::ofstream score_out_file("quantification.dat");
-
-	double quantification = 0;
-	int loopy = 0;
-
-	for (float threshold = 0; threshold <= 1; threshold+= 0.1)
-	{
-		double threshold_score = score(map, structure, threshold);
-		quantification += threshold_score;
-		loopy++;
-		score_out_file << threshold << "\t" << threshold_score << std::endl;
-	}
-
-	quantification = quantification / loopy;
-	score_out_file << "----------------------------------------\n" << "Final Score: " << quantification;
 
 	return 0;
 }
