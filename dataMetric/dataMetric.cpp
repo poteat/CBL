@@ -45,8 +45,7 @@ cbl::real applyLineData(mrc map, pdb structure, cbl::real deviation, std::string
 void cylinderCutOut(mrc& map, pdb structure)
 {
 	//Chop out the density around helixes using a cylinder of 5-6 angstroms
-	std::string dist = "5";
-	cbl::real cropping_dist = (cbl::real) std::stod(dist);
+	cbl::real cropping_dist = (cbl::real) 5;
 
 	mrc near, far;
 
@@ -62,6 +61,19 @@ int main(int argc, char* argv[])
 
 	std::string mrc_file_path_in = argv[1];
 	std::string pdb_file_path_in = argv[2];
+
+	size_t period_pos_pdb = pdb_file_path_in.find_last_of('.');
+	std::string pdb_axis_comp_path = pdb_file_path_in;
+	pdb_axis_comp_path.resize(period_pos_pdb);
+	std::string pdb_file_directory = pdb_file_path_in;
+	pdb_file_directory.resize(pdb_file_directory.find_last_of('\\'));
+
+	std::string command = "leastsquare.exe \"" + pdb_axis_comp_path + "\" \"Empty\" \"Empty\" \"Empty\"";
+
+	std::string output_path_command = "mkdir \"" + pdb_file_directory + "/output/\"";
+
+	system(output_path_command.c_str());
+	system(command.c_str());
 
 	std::cout << argv[0] << std::endl;
 
