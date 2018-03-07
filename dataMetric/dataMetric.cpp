@@ -42,7 +42,7 @@ cbl::real applyLineData(mrc map, pdb structure, cbl::real deviation, std::string
 	return variance(line.error, avg(line.error));
 }
 
-void cylinderCutOut(mrc map, pdb structure)
+void cylinderCutOut(mrc& map, pdb structure)
 {
 	//Chop out the density around helixes using a cylinder of 5-6 angstroms
 	std::string dist = "5";
