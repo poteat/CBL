@@ -117,7 +117,7 @@ namespace cbl
 				}
 			}
 		}
-	private:
+	public:
 
 		std::vector<point> points;
 		std::vector<real> error;
