@@ -60,8 +60,11 @@ int main(int argc, char* argv[])
 	int num_args = 2;
 	assert(argc == num_args + 1 && "Incorrect num arguments, 2 inputs: mrc, pdb");
 
-	mrc map(argv[1]);
-	pdb structure(argv[2]);
+	std::string mrc_file_path = argv[1];
+	std::string pdb_file_path = argv[2];
+
+	mrc map(mrc_file_path);
+	pdb structure(pdb_file_path);
 	std::string data_result;
 
 	cylinderCutOut(map, structure);
@@ -70,10 +73,16 @@ int main(int argc, char* argv[])
 
 	map.normalize();
 
-	std::ofstream score_out_file("quantification.dat");
+	// Build names based on input mrc filename
+	size_t period_pos = mrc_file_path.find_last_of('.');
+	mrc_file_path.resize(period_pos);
+
+	std::string quant_file_path_out = mrc_file_path + "_quantification.dat";
+
+	std::ofstream score_out_file(quant_file_path_out);
 	std::vector<double>threshold_score;
 	int loopy = 0;
-	double final_variance = 0;
+	
 
 	for (float t = 0.2f; t <= 2.0f; t += 0.2f)
 	{
@@ -83,6 +92,8 @@ int main(int argc, char* argv[])
 	}
 
 	score_out_file << "\n\nUtilized scores\n";
+
+	double final_variance = 0;
 	std::sort(threshold_score.begin(), threshold_score.end());
 	for (int i = 0; i <= (loopy / 2); i++)
 	{
@@ -90,7 +101,7 @@ int main(int argc, char* argv[])
 		score_out_file <<threshold_score[i] << std::endl;
 	}
 
-	final_variance = (final_variance / (loopy / 2));
+	final_variance /= (loopy / 2 + 1);
 
 	score_out_file << "----------------------------------------\n" << "Final Score: " << final_variance;
 	score_out_file.close();
