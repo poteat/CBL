@@ -60,24 +60,25 @@ int main(int argc, char* argv[])
 	int num_args = 2;
 	assert(argc == num_args + 1 && "Incorrect num arguments, 2 inputs: mrc, pdb");
 
-	std::string mrc_file_path = argv[1];
-	std::string pdb_file_path = argv[2];
+	std::string mrc_file_path_in = argv[1];
+	std::string pdb_file_path_in = argv[2];
 
-	mrc map(mrc_file_path);
-	pdb structure(pdb_file_path);
+	mrc map(mrc_file_path_in);
+	pdb structure(pdb_file_path_in);
 	std::string data_result;
+
+	std::string quant_file_path_out = mrc_file_path_in + "_quantification.dat";
+	std::string cropped_file_path_out = mrc_file_path_in + "_croppedMRC.dat";
 
 	cylinderCutOut(map, structure);
 
-	map.write("generatedMRC.mrc");
+	map.write(cropped_file_path_out);
 
 	map.normalize();
 
 	// Build names based on input mrc filename
-	size_t period_pos = mrc_file_path.find_last_of('.');
-	mrc_file_path.resize(period_pos);
-
-	std::string quant_file_path_out = mrc_file_path + "_quantification.dat";
+	size_t period_pos = mrc_file_path_in.find_last_of('.');
+	mrc_file_path_in.resize(period_pos);
 
 	std::ofstream score_out_file(quant_file_path_out);
 	std::vector<double>threshold_score;
