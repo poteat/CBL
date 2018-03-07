@@ -39,7 +39,7 @@ cbl::real applyLineData(mrc map, pdb structure, cbl::real deviation, std::string
 
 	data += out.str();
 
-	return variance(line.error, avg(line.error));
+	return (cbl::real) variance(line.error, avg(line.error));
 }
 
 void cylinderCutOut(mrc& map, pdb structure)
@@ -63,22 +63,24 @@ int main(int argc, char* argv[])
 	std::string mrc_file_path_in = argv[1];
 	std::string pdb_file_path_in = argv[2];
 
+	std::cout << argv[0] << std::endl;
+
 	mrc map(mrc_file_path_in);
 	pdb structure(pdb_file_path_in);
 	std::string data_result;
 
+	// Build names based on input mrc filename
+	size_t period_pos = mrc_file_path_in.find_last_of('.');
+	mrc_file_path_in.resize(period_pos);
+
 	std::string quant_file_path_out = mrc_file_path_in + "_quantification.dat";
-	std::string cropped_file_path_out = mrc_file_path_in + "_croppedMRC.dat";
+	std::string cropped_file_path_out = mrc_file_path_in + "_cropped.mrc";
 
 	cylinderCutOut(map, structure);
 
 	map.write(cropped_file_path_out);
 
 	map.normalize();
-
-	// Build names based on input mrc filename
-	size_t period_pos = mrc_file_path_in.find_last_of('.');
-	mrc_file_path_in.resize(period_pos);
 
 	std::ofstream score_out_file(quant_file_path_out);
 	std::vector<double>threshold_score;
