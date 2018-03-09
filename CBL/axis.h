@@ -45,6 +45,78 @@ namespace cbl
 			}
 		}
 
+		void mergeError(real merge_length)
+		{
+			// Loop across points, merging points and associated error when length is surpassed
+
+			std::vector<point> new_points;
+			std::vector<real> new_errors;
+
+			std::vector<point> temp_stack;
+			std::vector<size_t> temp_stack_index;
+
+			real length = 0;
+
+			if (points.size())
+			{
+				temp_stack.push_back(points[0]);
+				temp_stack_index.push_back(0);
+			}
+				
+
+			for (size_t i = 1; i < points.size(); i++)
+			{
+				auto p_prev = points[i - 1];
+				auto p = points[i];
+
+				temp_stack.push_back(p);
+				temp_stack_index.push_back(i);
+
+				length += p.dist(p_prev);
+
+				if (length > merge_length)
+				{
+					// Get average pos of points so far on temp stack
+
+					length = 0;
+
+					real x = 0, y = 0, z = 0;
+					
+					for (size_t j = 0; j < temp_stack.size(); j++)
+					{
+						x += temp_stack[j].x;
+						y += temp_stack[j].y;
+						z += temp_stack[j].z;
+					}
+
+					x /= temp_stack.size();
+					y /= temp_stack.size();
+					z /= temp_stack.size();
+
+					new_points.emplace_back(x, y, z);
+
+					// Get average error of points
+
+					real sum_error = 0;
+
+					for (size_t j = 0; j < temp_stack_index.size(); j++)
+					{
+						sum_error += error[temp_stack_index[j]];
+					}
+
+					sum_error /= temp_stack_index.size();
+
+					new_errors.push_back(sum_error);
+
+					temp_stack.clear();
+					temp_stack_index.clear();
+				}
+			}
+
+			points = new_points;
+			error = new_errors;
+		}
+
 		void calcError(mrc &m, std::function<real(std::vector<real>)> fold)
 		{
 			// For each voxel, find the closest pdb point, then register that error with that point

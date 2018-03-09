@@ -34,6 +34,11 @@ namespace cbl
 			return sqrt(distSq(_x, _y, _z));
 		};
 
+		real dist(point &p)
+		{
+			return sqrt(distSq(p.x, p.y, p.z));
+		}
+
 		void set(Vector3f &v)
 		{
 			x = v[0];

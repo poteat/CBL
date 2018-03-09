@@ -1,1 +1,1 @@
-"../gnuplot-win/gnuplot.exe" -persist "scatter.script"
+start "plot" /B "../gnuplot-win/gnuplot.exe" -persist -e "filename='%~1'" "scatter.script"
