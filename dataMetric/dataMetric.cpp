@@ -2,6 +2,7 @@
 #include <string>
 #include <functional>
 #include <sstream>
+#include <experimental/filesystem>
 
 #include "axis.h"
 #include "mrc.h"
@@ -26,12 +27,14 @@ cbl::real applyLineData(mrc map, pdb structure, cbl::real deviation, std::string
 	auto variance = [](std::vector<cbl::real> v, cbl::real avg)
 	{
 		cbl::real variance_sum = 0;
-		auto add = [&](cbl::real x) {variance_sum += pow((x - avg), 2); };
+		auto add = [&](cbl::real x) {variance_sum += pow(x - avg, 2); };
 		std::for_each(v.begin(), v.end(), add);
-		return (pow((variance_sum / v.size()), .5));
+		return sqrt(variance_sum / v.size());
 	};
 
 	line.calcError(map, avg);
+
+	std::cout << "Final PDB Sampling Amount: " << line.points.size() << std::endl;
 
 	std::ostringstream out;
 
@@ -42,7 +45,7 @@ cbl::real applyLineData(mrc map, pdb structure, cbl::real deviation, std::string
 	return (cbl::real) variance(line.error, avg(line.error));
 }
 
-void cylinderCutOut(mrc& map, pdb structure)
+mrc cylinderCutOut(mrc &map, pdb &structure)
 {
 	//Chop out the density around helixes using a cylinder of 5-6 angstroms
 	cbl::real cropping_dist = (cbl::real) 5;
@@ -51,7 +54,54 @@ void cylinderCutOut(mrc& map, pdb structure)
 
 	std::tie(near, far) = map.crop(structure, cropping_dist);
 
-	map = near;
+	return near;
+}
+
+std::vector<pdb> runAxisComparison(std::string pdb_path)
+{
+	using path = std::experimental::filesystem::path;
+
+	// Convert relative to absolute path if necessary, using experimental std lib
+	// If there are symbolic links, we also convert those to canonical form
+	path symbolic_pdb_path = pdb_path;
+	symbolic_pdb_path = std::experimental::filesystem::canonical(symbolic_pdb_path);
+	pdb_path = symbolic_pdb_path.string();
+
+	// Assert that the extension is ".pdb"
+	assert(symbolic_pdb_path.extension() == ".pdb");
+
+	// Make output directory for results to be populated
+	path output_path = symbolic_pdb_path.parent_path().string() + "/output";
+	std::experimental::filesystem::create_directory(output_path);
+
+	// Get path stripped of file extension for input into axis-comparsion
+	path stripped_path = symbolic_pdb_path.parent_path().string() + "/" + 
+		symbolic_pdb_path.stem().string();
+
+	std::string command = "leastsquare.exe \"" + stripped_path.string()
+		+ "\" \"Empty\" \"Empty\" \"Empty\"";
+
+	// Execute axis comparison
+	system(command.c_str());
+
+	// Read all files in this directory that begin with "trueHelix"
+
+	std::vector<cbl::pdb> matched_helix;
+
+	for (auto &p : std::experimental::filesystem::directory_iterator(output_path))
+	{
+		auto s = p.path().filename().string();
+
+		std::cout << s << std::endl;
+
+		// If begins with "trueHelix"
+		if (s.find("trueHelix") == 0)
+		{
+			matched_helix.emplace_back(p.path().string());
+		}
+	}
+
+	return matched_helix;
 }
 
 int main(int argc, char* argv[])
@@ -61,74 +111,74 @@ int main(int argc, char* argv[])
 
 	std::string mrc_file_path_in = argv[1];
 	std::string pdb_file_path_in = argv[2];
+	
+	std::vector<pdb> helices = runAxisComparison(pdb_file_path_in);
 
-	size_t period_pos_pdb = pdb_file_path_in.find_last_of('.');
-	std::string pdb_axis_comp_path = pdb_file_path_in;
-	pdb_axis_comp_path.resize(period_pos_pdb);
-	std::string pdb_file_directory = pdb_file_path_in;
-	pdb_file_directory.resize(pdb_file_directory.find_last_of('\\'));
+	mrc entire_map(mrc_file_path_in);
 
-	std::string command = "leastsquare.exe \"" + pdb_axis_comp_path + "\" \"Empty\" \"Empty\" \"Empty\"";
-
-	std::string output_path_command = "mkdir \"" + pdb_file_directory + "/output/\"";
-
-	system(output_path_command.c_str());
-	system(command.c_str());
-
-	std::cout << argv[0] << std::endl;
-
-	mrc map(mrc_file_path_in);
-	pdb structure(pdb_file_path_in);
-	std::string data_result;
-
-	// Build names based on input mrc filename
+	// Build stripped mrc file_name for creating out filenames
 	size_t period_pos = mrc_file_path_in.find_last_of('.');
 	mrc_file_path_in.resize(period_pos);
+	mrc_file_path_in += "_helix";
 
-	std::string quant_file_path_out = mrc_file_path_in + "_quantification.dat";
-	std::string cropped_file_path_out = mrc_file_path_in + "_cropped.mrc";
-
-	cylinderCutOut(map, structure);
-
-	map.write(cropped_file_path_out);
-
-	map.normalize();
-
-	std::ofstream score_out_file(quant_file_path_out);
-	std::vector<double>threshold_score;
-	int loopy = 0;
-	
-
-	for (float t = 0.2f; t <= 2.0f; t += 0.2f)
+	for (size_t i = 0; i < helices.size(); i++)
 	{
-		threshold_score.push_back(applyLineData(map, structure, t, data_result));
-		score_out_file << t << "\t" << threshold_score[loopy] << std::endl;
-		loopy++;
+		pdb& helix = helices[i];
+		std::string data_result;
+
+		std::string quant_file_path_out = mrc_file_path_in + std::to_string(i + 1) + "_quantification.txt";
+		std::string cropped_file_path_out = mrc_file_path_in + std::to_string(i + 1) + "_chopped.mrc_";
+		std::string scatter_file_path_out = mrc_file_path_in + std::to_string(i + 1) + "_scatter.txt";
+
+		mrc helix_mrc = cylinderCutOut(entire_map, helix);
+		helix_mrc.normalize();
+		helix_mrc.write(cropped_file_path_out);
+
+		std::ofstream score_out_file(quant_file_path_out);
+		std::vector<cbl::real> threshold_score;
+
+		size_t j = 0;
+
+		for (float t = 0.2f; t <= 2.0f; t += 0.2f)
+		{
+			threshold_score.push_back(applyLineData(helix_mrc, helix, t, data_result));
+			score_out_file << t << "\t" << threshold_score[j] << std::endl;
+			j++;
+		}
+
+		int num_threshold_samples = j;
+
+		score_out_file << "\n\nUtilized scores\n";
+
+		double final_variance = 0;
+		std::sort(threshold_score.begin(), threshold_score.end());
+		for (int j = 0; j <= (num_threshold_samples / 2); j++)
+		{
+			final_variance += threshold_score[j];
+			score_out_file << threshold_score[j] << std::endl;
+		}
+
+		final_variance /= (num_threshold_samples / 2 + 1);
+
+		score_out_file << "----------------------------------------\n" << "Final Score: " << final_variance;
+		score_out_file.close();
+
+
+		// Display scatter plot
+		std::ofstream out_file(scatter_file_path_out);
+		out_file << data_result << std::endl;
+		out_file.close();
+
+		std::string scatter_command = "display_scatter_plot.bat \"" + scatter_file_path_out + "\"";
+		system(scatter_command.c_str());
+
+
+		// Append total helix result to summary file
+
+		std::ofstream summary("summary.txt", std::ofstream::out | std::ofstream::app);
+		summary << mrc_file_path_in << i+1 << ", " << final_variance << std::endl;
+		summary.close();
 	}
-
-	score_out_file << "\n\nUtilized scores\n";
-
-	double final_variance = 0;
-	std::sort(threshold_score.begin(), threshold_score.end());
-	for (int i = 0; i <= (loopy / 2); i++)
-	{
-		final_variance += threshold_score[i];
-		score_out_file <<threshold_score[i] << std::endl;
-	}
-
-	final_variance /= (loopy / 2 + 1);
-
-	score_out_file << "----------------------------------------\n" << "Final Score: " << final_variance;
-	score_out_file.close();
-
-
-	std::ofstream out_file("scatter.dat");
-
-	out_file << data_result << std::endl;
-
-	out_file.close();
-
-	system("display_scatter_plot.bat");
 
 	return 0;
 }

@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2013
-VisualStudioVersion = 12.0.21005.1
+# Visual Studio 15
+VisualStudioVersion = 15.0.27130.2036
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "_CBL", "CBL\CBL.vcxproj", "{47DE671E-63C8-4D0B-AF38-4D680D4D54EF}"
 EndProject
@@ -14,6 +14,10 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "applyConvolution", "ApplyConvolution\ApplyConvolution.vcxproj", "{5A7DE24A-2C71-4905-A9A9-9989C289F57C}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "dataMetric", "dataMetric\dataMetric.vcxproj", "{702D65A9-04CA-4D4D-ADAE-BC108F7937A9}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Utility", "Utility", "{47B3D400-E049-47E2-B202-927666961604}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "runProgOnPair", "runProgOnPair\runProgOnPair.vcxproj", "{62A07481-ACA6-43A3-B8E6-C0EFC21D80EC}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -61,9 +65,20 @@ Global
 		{702D65A9-04CA-4D4D-ADAE-BC108F7937A9}.Release|Win32.ActiveCfg = Release|Win32
 		{702D65A9-04CA-4D4D-ADAE-BC108F7937A9}.Release|Win32.Build.0 = Release|Win32
 		{702D65A9-04CA-4D4D-ADAE-BC108F7937A9}.Release|x64.ActiveCfg = Release|Win32
+		{62A07481-ACA6-43A3-B8E6-C0EFC21D80EC}.Debug|Win32.ActiveCfg = Debug|Win32
+		{62A07481-ACA6-43A3-B8E6-C0EFC21D80EC}.Debug|Win32.Build.0 = Debug|Win32
+		{62A07481-ACA6-43A3-B8E6-C0EFC21D80EC}.Debug|x64.ActiveCfg = Debug|x64
+		{62A07481-ACA6-43A3-B8E6-C0EFC21D80EC}.Debug|x64.Build.0 = Debug|x64
+		{62A07481-ACA6-43A3-B8E6-C0EFC21D80EC}.Release|Win32.ActiveCfg = Release|Win32
+		{62A07481-ACA6-43A3-B8E6-C0EFC21D80EC}.Release|Win32.Build.0 = Release|Win32
+		{62A07481-ACA6-43A3-B8E6-C0EFC21D80EC}.Release|x64.ActiveCfg = Release|x64
+		{62A07481-ACA6-43A3-B8E6-C0EFC21D80EC}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{62A07481-ACA6-43A3-B8E6-C0EFC21D80EC} = {47B3D400-E049-47E2-B202-927666961604}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {9EDA47A9-964C-4A97-A329-F4C70FE3F9A6}
