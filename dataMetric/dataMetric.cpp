@@ -13,7 +13,13 @@ cbl::real applyLineData(mrc map, pdb structure, cbl::real deviation, std::string
 {
 	axis line(structure);
 
-	map.applyDeviationThreshold(deviation);
+	cbl::real deviation_value = map.map.standard_deviation();
+
+	cbl::real threshold_used = deviation_value * deviation;
+
+	std::cout << threshold_used << std::endl;
+
+	map.applyThreshold(deviation);
 	map.setHollowBoundary();
 
 	auto avg = [](std::vector<cbl::real> v)
@@ -139,7 +145,7 @@ int main(int argc, char* argv[])
 
 		size_t j = 0;
 
-		for (float t = 0.2f; t <= 2.0f; t += 0.2f)
+		for (float t = 0.1f; t <= 1.0f; t += 0.1f)
 		{
 			threshold_score.push_back(applyLineData(helix_mrc, helix, t, data_result));
 			score_out_file << t << "\t" << threshold_score[j] << std::endl;
@@ -152,7 +158,7 @@ int main(int argc, char* argv[])
 
 		double final_variance = 0;
 		std::sort(threshold_score.begin(), threshold_score.end());
-		for (int j = 0; j <= (num_threshold_samples / 2); j++)
+		for (int j = 0; j < (num_threshold_samples); j++)
 		{
 			final_variance += threshold_score[j];
 			score_out_file << threshold_score[j] << std::endl;
