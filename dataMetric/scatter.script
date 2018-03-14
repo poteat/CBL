@@ -1,7 +1,8 @@
 set dgrid3d ,,16
 set title filename
 set xlabel "axis parameter"
-set ylabel "threshold
+set ylabel "threshold"
 set zlabel "score"
 set style data lines
+set zrange[0:5]
 splot filename
