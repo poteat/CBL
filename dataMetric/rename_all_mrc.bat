@@ -1,0 +1,1 @@
+FOR /R %%x IN (*.mrc_) DO ren "%%x" *.mrc
