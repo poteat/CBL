@@ -17,9 +17,9 @@ cbl::real applyLineData(mrc map, pdb structure, cbl::real deviation, std::string
 
 	cbl::real threshold_used = deviation_value * deviation;
 
-	std::cout << threshold_used << std::endl;
+	std::cout << "# Deviations: " << deviation << "     Threshold Used: " << threshold_used << std::endl;
 
-	map.applyThreshold(deviation);
+	map.applyDeviationThreshold(deviation);
 	map.setHollowBoundary();
 
 	auto avg = [](std::vector<cbl::real> v)
@@ -40,7 +40,7 @@ cbl::real applyLineData(mrc map, pdb structure, cbl::real deviation, std::string
 
 	line.calcError(map, avg);
 
-	std::cout << "Final PDB Sampling Amount: " << line.points.size() << std::endl;
+	line.mergeError(1.0); // Angstroms
 
 	std::ostringstream out;
 
@@ -58,7 +58,12 @@ mrc cylinderCutOut(mrc &map, pdb &structure)
 
 	mrc near, far;
 
-	std::tie(near, far) = map.crop(structure, cropping_dist);
+	std::tie(near, far) = map.cylinderCrop(structure, cropping_dist);
+
+	near.minimize();
+
+	// To reduce Chimera blockiness visual effect
+	// near.pad(5);
 
 	return near;
 }
@@ -98,14 +103,21 @@ std::vector<pdb> runAxisComparison(std::string pdb_path)
 	{
 		auto s = p.path().filename().string();
 
-		std::cout << s << std::endl;
-
 		// If begins with "trueHelix"
 		if (s.find("trueHelix") == 0)
 		{
 			matched_helix.emplace_back(p.path().string());
 		}
 	}
+
+	// Rename output directory to something we can refer to later
+
+	path new_output_path = symbolic_pdb_path.parent_path().string() + "/"
+		+ symbolic_pdb_path.stem().string();
+
+	std::experimental::filesystem::remove_all(new_output_path);
+
+	std::experimental::filesystem::rename(output_path, new_output_path);
 
 	return matched_helix;
 }
@@ -138,6 +150,7 @@ int main(int argc, char* argv[])
 
 		mrc helix_mrc = cylinderCutOut(entire_map, helix);
 		helix_mrc.normalize();
+
 		helix_mrc.write(cropped_file_path_out);
 
 		std::ofstream score_out_file(quant_file_path_out);
@@ -145,7 +158,7 @@ int main(int argc, char* argv[])
 
 		size_t j = 0;
 
-		for (float t = 0.1f; t <= 1.0f; t += 0.1f)
+		for (float t = 0.75f; t <= 1.0001f; t += 0.025f)
 		{
 			threshold_score.push_back(applyLineData(helix_mrc, helix, t, data_result));
 			score_out_file << t << "\t" << threshold_score[j] << std::endl;
@@ -176,7 +189,7 @@ int main(int argc, char* argv[])
 		out_file.close();
 
 		std::string scatter_command = "display_scatter_plot.bat \"" + scatter_file_path_out + "\"";
-		system(scatter_command.c_str());
+		// system(scatter_command.c_str());
 
 
 		// Append total helix result to summary file
@@ -185,6 +198,8 @@ int main(int argc, char* argv[])
 		summary << mrc_file_path_in << i+1 << ", " << final_variance << std::endl;
 		summary.close();
 	}
+
+	system("pause");
 
 	return 0;
 }

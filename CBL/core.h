@@ -173,9 +173,10 @@ namespace cbl
 		T mean()
 		{
 			T sum = 0;
-			auto f = [&sum](T x) {sum += x; };
+			int count = 0;
+			auto f = [&](T x) {sum += x; count += x > 0; };
 			std::for_each(data.begin(), data.end(), f);
-			sum /= data.size();
+			sum /= count;
 			return sum;
 		}
 
@@ -183,9 +184,10 @@ namespace cbl
 		{
 			T mean_val = mean();
 			T square_sum = 0;
-			auto f = [&](T x) {square_sum += pow(mean_val - x, 2); };
+			T count = 0;
+			auto f = [&](T x) {square_sum += pow(mean_val - x, 2); count += x > 0; };
 			std::for_each(data.begin(), data.end(), f);
-			square_sum /= data.size();
+			square_sum /= count;
 			return square_sum;
 		}
 

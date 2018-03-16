@@ -241,6 +241,103 @@ namespace cbl
 			}
 		}
 
+		// If possible, chops the total box to reduce file size
+		void minimize()
+		{
+			// Identify min_x, max_x, min_y, etc...
+
+			int min_x = INT_MAX;
+			int min_y = INT_MAX;
+			int min_z = INT_MAX;
+
+			int max_x = INT_MIN;
+			int max_y = INT_MIN;
+			int max_z = INT_MIN;
+
+			for (int i = 0; i < (int) header.nx; i++)
+			{
+				for (int j = 0; j < (int) header.ny; j++)
+				{
+					for (int k = 0; k < (int) header.nz; k++)
+					{
+						real density = map(i, j, k);
+
+						if (density != 0)
+						{
+							min_x = i < min_x ? i : min_x;
+							min_y = j < min_y ? j : min_y;
+							min_z = k < min_z ? k : min_z;
+
+							max_x = i > max_x ? i : max_x;
+							max_y = j > max_y ? j : max_y;
+							max_z = k > max_z ? k : max_z;
+						}
+					}
+				}
+			}
+
+			// At this point we have the subset of the original cube.  We need
+			// to carefully ensure we do not break the alignment.
+
+			int new_nx = max_x - min_x;
+			int new_ny = max_y - min_y;
+			int new_nz = max_z - min_z;
+
+			auto new_map = cube<real>(new_nx, new_ny, new_nz);
+
+			for (int i = 0; i < new_nx; i++)
+			{
+				for (int j = 0; j < new_ny; j++)
+				{
+					for (int k = 0; k < new_nz; k++)
+					{
+						new_map(i, j, k) = map(i + min_x, j + min_y, k + min_z);
+					}
+				}
+			}
+
+			header.nx = new_nx;
+			header.ny = new_ny;
+			header.nz = new_nz;
+
+			header.xorigin += float(min_x) * scale;
+			header.yorigin += float(min_y) * scale;
+			header.zorigin += float(min_z) * scale;
+
+			map = new_map;
+		}
+
+		// Adds zero-padding to box on all six sides
+		void pad(size_t num)
+		{
+			int new_nx = header.nx += num * 2;
+			int new_ny = header.ny += num * 2;
+			int new_nz = header.nz += num * 2;
+
+			auto new_map = cube<real>(new_nx, new_ny, new_nz);
+
+			for (size_t i = num; i < new_nx - num; i++)
+			{
+				for (size_t j = num; j < new_ny - num; j++)
+				{
+					for (size_t k = num; k < new_nz - num; k++)
+					{
+						new_map(i, j, k) = map(i - num, j - num, k - num);
+					}
+				}
+			}
+
+			header.nx = new_nx;
+			header.ny = new_ny;
+			header.nz = new_nz;
+
+			header.xorigin -= num * scale;
+			header.yorigin -= num * scale;
+			header.zorigin -= num * scale;
+
+			map = new_map;
+		}
+
 		point pdbSpaceVoxel(size_t n)
 		{
 			point voxel = map.point(n);
@@ -407,6 +504,67 @@ namespace cbl
 						min_dist = sqrt(min_dist); // Get actual distance (not squared)
 
 						if (min_dist < cropping_dist)
+						{
+							far_map.map(i, j, k) = 0;
+						}
+						else
+						{
+							near_map.map(i, j, k) = 0;
+						}
+					}
+				}
+			}
+
+			return std::make_tuple(near_map, far_map);
+		}
+
+		// This function is similar to crop, but is based on a cylindrical model instead
+		// of a spherical one.  The pdb input should be a linear sequence of positions with
+		// nearby values.
+		// The trick is very easy: we exclude the voxels that project to the endpoints from
+		// consideration.
+		std::tuple<mrc, mrc> cylinderCrop(pdb& pdb, real cropping_dist)
+		{
+			mrc near_map(*this);
+			mrc far_map(*this);
+
+			for (size_t i = 0; i < header.nx; i++)
+			{
+				for (size_t j = 0; j < header.ny; j++)
+				{
+					for (size_t k = 0; k < header.nz; k++)
+					{
+						// Compute "real-space" coordinates from (i,j,k)
+						real x = i * scale + header.xorigin;
+						real y = j * scale + header.yorigin;
+						real z = k * scale + header.zorigin;
+
+						// For each point in given pdb, compute distance.  Find min_distance
+						real min_dist = std::numeric_limits<real>::infinity();
+						size_t min_index = 0;
+
+						for (size_t m = 0; m < pdb.size(); m++)
+						{
+							point p = pdb[m];
+							real dist_sq = p.distSq(x, y, z);
+
+							if (dist_sq < min_dist)
+							{
+								min_dist = dist_sq;
+								min_index = m;
+							}
+						}
+
+						min_dist = sqrt(min_dist); // Get actual distance (not squared)
+
+						bool is_side_voxel = false;
+
+						if (min_index == 0 || min_index == pdb.size() - 1)
+						{
+							is_side_voxel = true;
+						}
+
+						if (min_dist < cropping_dist && !is_side_voxel)
 						{
 							far_map.map(i, j, k) = 0;
 						}

@@ -1,8 +1,10 @@
-set dgrid3d ,,16
-set title filename
+set title filename offset 0,-3
 set xlabel "axis parameter"
 set ylabel "threshold"
 set zlabel "score"
+set ticslevel 0
+set size .8, 1.2
+set dgrid3d 20,20,2
+set hidden3d
 set style data lines
-set zrange[0:5]
 splot filename

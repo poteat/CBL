@@ -8,8 +8,6 @@
 int main(int argc, char *argv[])
 {
 	int num_args = 2;
-	std::cout << "hello" << std::endl;
-	std::cout << argc << std::endl;
 	assert(argc == num_args + 1 && "Incorrect num arguments, 2 inputs: cmd, file.foo");
 
 	std::string program = argv[1];
