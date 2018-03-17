@@ -142,64 +142,65 @@ int main(int argc, char* argv[])
 	for (size_t i = 0; i < helices.size(); i++)
 	{
 		pdb& helix = helices[i];
-		std::string data_result;
 
-		std::string quant_file_path_out = mrc_file_path_in + std::to_string(i + 1) + "_quantification.txt";
-		std::string cropped_file_path_out = mrc_file_path_in + std::to_string(i + 1) + "_chopped.mrc_";
-		std::string scatter_file_path_out = mrc_file_path_in + std::to_string(i + 1) + "_scatter.txt";
-
-		mrc helix_mrc = cylinderCutOut(entire_map, helix);
-		helix_mrc.normalize();
-
-		helix_mrc.write(cropped_file_path_out);
-
-		std::ofstream score_out_file(quant_file_path_out);
-		std::vector<cbl::real> threshold_score;
-
-		size_t j = 0;
-
-		for (float t = 0.75f; t <= 1.0001f; t += 0.025f)
+		if (helix.size() > 1)
 		{
-			threshold_score.push_back(applyLineData(helix_mrc, helix, t, data_result));
-			score_out_file << t << "\t" << threshold_score[j] << std::endl;
-			j++;
+			std::string data_result;
+
+			std::string quant_file_path_out = mrc_file_path_in + std::to_string(i + 1) + "_quantification.txt";
+			std::string cropped_file_path_out = mrc_file_path_in + std::to_string(i + 1) + "_chopped.mrc_";
+			std::string scatter_file_path_out = mrc_file_path_in + std::to_string(i + 1) + "_scatter.txt";
+
+			mrc helix_mrc = cylinderCutOut(entire_map, helix);
+			helix_mrc.normalize();
+
+			helix_mrc.write(cropped_file_path_out);
+
+			std::ofstream score_out_file(quant_file_path_out);
+			std::vector<cbl::real> threshold_score;
+
+			size_t j = 0;
+
+			for (float t = 0.75f; t <= 1.0001f; t += 0.025f)
+			{
+				threshold_score.push_back(applyLineData(helix_mrc, helix, t, data_result));
+				score_out_file << t << "\t" << threshold_score[j] << std::endl;
+				j++;
+			}
+
+			int num_threshold_samples = j;
+
+			score_out_file << "\n\nUtilized scores\n";
+
+			double final_variance = 0;
+			std::sort(threshold_score.begin(), threshold_score.end());
+			for (int j = 0; j < (num_threshold_samples); j++)
+			{
+				final_variance += threshold_score[j];
+				score_out_file << threshold_score[j] << std::endl;
+			}
+
+			final_variance /= (num_threshold_samples / 2 + 1);
+
+			score_out_file << "----------------------------------------\n" << "Final Score: " << final_variance;
+			score_out_file.close();
+
+
+			// Save scatter plot image
+			std::ofstream out_file(scatter_file_path_out);
+			out_file << data_result << std::endl;
+			out_file.close();
+
+			std::string scatter_command = "generate_plot_as_image.bat \"" + scatter_file_path_out + "\"";
+			system(scatter_command.c_str());
+
+			// Append total helix result to summary file
+
+			std::ofstream summary("summary.txt", std::ofstream::out | std::ofstream::app);
+			summary << mrc_file_path_in << i+1 << ", " << final_variance << std::endl;
+			summary.close();
 		}
-
-		int num_threshold_samples = j;
-
-		score_out_file << "\n\nUtilized scores\n";
-
-		double final_variance = 0;
-		std::sort(threshold_score.begin(), threshold_score.end());
-		for (int j = 0; j < (num_threshold_samples); j++)
-		{
-			final_variance += threshold_score[j];
-			score_out_file << threshold_score[j] << std::endl;
-		}
-
-		final_variance /= (num_threshold_samples / 2 + 1);
-
-		score_out_file << "----------------------------------------\n" << "Final Score: " << final_variance;
-		score_out_file.close();
-
-
-		// Display scatter plot
-		std::ofstream out_file(scatter_file_path_out);
-		out_file << data_result << std::endl;
-		out_file.close();
-
-		std::string scatter_command = "display_scatter_plot.bat \"" + scatter_file_path_out + "\"";
-		// system(scatter_command.c_str());
-
-
-		// Append total helix result to summary file
-
-		std::ofstream summary("summary.txt", std::ofstream::out | std::ofstream::app);
-		summary << mrc_file_path_in << i+1 << ", " << final_variance << std::endl;
-		summary.close();
 	}
-
-	system("pause");
 
 	return 0;
 }

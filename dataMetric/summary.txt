@@ -78,3 +78,11 @@
 5ldx_Q_helix2, 0.766354
 5ldx_Q_helix1, 0.393963
 5ldx_Q_helix2, 0.784506
+5ldx_Q_helix1, 0.393963
+5ldx_Q_helix2, 0.784506
+5ldx_Q_helix1, 0.393963
+5ldx_Q_helix2, 0.784506
+5ldx_Q_helix1, 0.393963
+5ldx_Q_helix2, 0.784506
+5ldx_Q_helix1, 0.393963
+5ldx_Q_helix2, 0.784506
