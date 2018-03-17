@@ -1,0 +1,1 @@
+runProgOnPair png_plot.bat "%~1" "txt" "png"

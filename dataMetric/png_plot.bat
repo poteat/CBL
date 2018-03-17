@@ -1,0 +1,1 @@
+start "plot" /B "../gnuplot-win/gnuplot.exe" -e "file1='%~1'; file2='%~2'" "png_plot.script"

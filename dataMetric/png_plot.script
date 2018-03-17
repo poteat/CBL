@@ -1,0 +1,13 @@
+set terminal png
+set output file2
+set title file1 offset 0,-3
+set xlabel "axis parameter"
+set ylabel "threshold"
+set zlabel "score"
+set ticslevel 0
+set size .8, 1.2
+set view 67, 147
+set dgrid3d 20,20,2
+set hidden3d
+set style data lines
+splot file1
