@@ -25,17 +25,28 @@ cbl::real applyLineData(mrc map, pdb structure, cbl::real deviation, std::string
 	auto avg = [](std::vector<cbl::real> v)
 	{
 		cbl::real sum = 0;
-		auto add = [&sum](cbl::real x) {sum += x; };
-		std::for_each(v.begin(), v.end(), add);
-		return sum / v.size();
+		int count = 0;
+		auto f = [&](cbl::real x) {sum += x; count += x > 0; };
+		std::for_each(v.begin(), v.end(), f);
+		sum /= count;
+		return sum;
 	};
 
 	auto variance = [](std::vector<cbl::real> v, cbl::real avg)
 	{
-		cbl::real variance_sum = 0;
-		auto add = [&](cbl::real x) {variance_sum += pow(x - avg, 2); };
-		std::for_each(v.begin(), v.end(), add);
-		return sqrt(variance_sum / v.size());
+		cbl::real square_sum = 0;
+		cbl::real count = 0;
+		auto f = [&](cbl::real x) {square_sum += (x > 0) * pow(avg - x, 2); count += x > 0; };
+		std::for_each(v.begin(), v.end(), f);
+		square_sum /= count;
+		if (count > 1)
+		{
+			return square_sum;
+		}
+		else
+		{
+			return (cbl::real) 0.0;
+		}
 	};
 
 	line.calcError(map, avg);
@@ -44,11 +55,16 @@ cbl::real applyLineData(mrc map, pdb structure, cbl::real deviation, std::string
 
 	std::ostringstream out;
 
-	line.write(out, deviation);
+	line.write(out, threshold_used);
 
 	data += out.str();
 
-	return (cbl::real) variance(line.error, avg(line.error));
+	cbl::real alpha = 0.5;
+	cbl::real beta = 0.5;
+
+	cbl::real threshold_score = alpha * sqrt(variance(line.error, avg(line.error))) + beta * avg(line.error);
+
+	return threshold_score;
 }
 
 mrc cylinderCutOut(mrc &map, pdb &structure)
@@ -172,33 +188,41 @@ int main(int argc, char* argv[])
 
 			score_out_file << "\n\nUtilized scores\n";
 
-			double final_variance = 0;
+			int count = 0;
+			double avg_variance = 0;
 			std::sort(threshold_score.begin(), threshold_score.end());
 			for (int j = 0; j < (num_threshold_samples); j++)
 			{
-				final_variance += threshold_score[j];
+				avg_variance += threshold_score[j];
+				if (threshold_score[j] != 0)
+				{
+					count++;
+				}
 				score_out_file << threshold_score[j] << std::endl;
 			}
 
-			final_variance /= (num_threshold_samples / 2 + 1);
+			avg_variance /= count;
 
-			score_out_file << "----------------------------------------\n" << "Final Score: " << final_variance;
-			score_out_file.close();
+			if (avg_variance != 0)
+			{
+				score_out_file << "----------------------------------------\n" << "Final Score: " << avg_variance;
+				score_out_file.close();
 
 
-			// Save scatter plot image
-			std::ofstream out_file(scatter_file_path_out);
-			out_file << data_result << std::endl;
-			out_file.close();
+				// Save scatter plot image
+				std::ofstream out_file(scatter_file_path_out);
+				out_file << data_result << std::endl;
+				out_file.close();
 
-			std::string scatter_command = "generate_plot_as_image.bat \"" + scatter_file_path_out + "\"";
-			system(scatter_command.c_str());
+				std::string scatter_command = "generate_plot_as_image.bat \"" + scatter_file_path_out + "\"";
+				system(scatter_command.c_str());
 
-			// Append total helix result to summary file
+				// Append total helix result to summary file
 
-			std::ofstream summary("summary.txt", std::ofstream::out | std::ofstream::app);
-			summary << mrc_file_path_in << i+1 << ", " << final_variance << std::endl;
-			summary.close();
+				std::ofstream summary("summary.txt", std::ofstream::out | std::ofstream::app);
+				summary << mrc_file_path_in << i+1 << ", " << avg_variance << std::endl;
+				summary.close();
+			}
 		}
 	}
 
