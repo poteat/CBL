@@ -185,7 +185,7 @@ namespace cbl
 			T mean_val = mean();
 			T square_sum = 0;
 			T count = 0;
-			auto f = [&](T x) {square_sum += pow(mean_val - x, 2); count += x > 0; };
+			auto f = [&](T x) {square_sum += (x > 0) * pow(mean_val - x, 2); count += x > 0; };
 			std::for_each(data.begin(), data.end(), f);
 			square_sum /= count;
 			return square_sum;
