@@ -9,78 +9,6 @@
 
 using namespace cbl;
 
-cbl::real applyLineData(mrc map, pdb structure, cbl::real deviation, std::string& data)
-{
-	axis line(structure);
-
-	cbl::real deviation_value = map.map.standard_deviation();
-
-	cbl::real threshold_used = deviation_value * deviation;
-
-	std::cout << "# Deviations: " << deviation << "     Threshold Used: " << threshold_used << std::endl;
-
-	map.applyDeviationThreshold(deviation);
-	map.setHollowBoundary();
-
-	auto avg = [](std::vector<cbl::real> v)
-	{
-		cbl::real sum = 0;
-		int count = 0;
-		auto f = [&](cbl::real x) {sum += x; count += x > 0; };
-		std::for_each(v.begin(), v.end(), f);
-		sum /= count;
-		return sum;
-	};
-
-	auto variance = [](std::vector<cbl::real> v, cbl::real avg)
-	{
-		cbl::real square_sum = 0;
-		cbl::real count = 0;
-		auto f = [&](cbl::real x) {square_sum += (x > 0) * pow(avg - x, 2); count += x > 0; };
-		std::for_each(v.begin(), v.end(), f);
-		square_sum /= count;
-		if (count > 1)
-		{
-			return square_sum;
-		}
-		else
-		{
-			return (cbl::real) 0.0;
-		}
-	};
-
-	line.calcError(map, avg);
-
-	line.mergeError(1.0); // Angstroms
-
-	std::ostringstream out;
-
-	line.write(out, threshold_used);
-
-	data += out.str();
-
-	cbl::real alpha = 0.5;
-	cbl::real beta = 0.5;
-
-	cbl::real threshold_score = alpha * sqrt(variance(line.error, avg(line.error))) + beta * avg(line.error);
-
-
-	int count_zero = 0;
-	for (size_t i = 0; i < line.error.size(); i++)
-	{
-		if (line.error[i] == 0)
-		{
-			count_zero++;
-		}
-	}
-
-	std::cout << "Percentage zero: " << (cbl::real) count_zero / (cbl::real) line.error.size() << std::endl;
-
-	threshold_score *= (1.0 - (cbl::real) count_zero / (cbl::real) line.error.size());
-
-	return threshold_score;
-}
-
 mrc cylinderCutOut(mrc &map, pdb &structure)
 {
 	//Chop out the density around helixes using a cylinder of 5-6 angstroms
@@ -116,7 +44,7 @@ std::vector<pdb> runAxisComparison(std::string pdb_path)
 	std::experimental::filesystem::create_directory(output_path);
 
 	// Get path stripped of file extension for input into axis-comparsion
-	path stripped_path = symbolic_pdb_path.parent_path().string() + "/" + 
+	path stripped_path = symbolic_pdb_path.parent_path().string() + "/" +
 		symbolic_pdb_path.stem().string();
 
 	std::string command = "leastsquare.exe \"" + stripped_path.string()
@@ -159,7 +87,7 @@ int main(int argc, char* argv[])
 
 	std::string mrc_file_path_in = argv[1];
 	std::string pdb_file_path_in = argv[2];
-	
+
 	std::vector<pdb> helices = runAxisComparison(pdb_file_path_in);
 
 	mrc entire_map(mrc_file_path_in);
@@ -234,7 +162,7 @@ int main(int argc, char* argv[])
 				// Append total helix result to summary file
 
 				std::ofstream summary("summary.txt", std::ofstream::out | std::ofstream::app);
-				summary << mrc_file_path_in << i+1 << ", " << avg_variance << std::endl;
+				summary << mrc_file_path_in << i + 1 << ", " << avg_variance << std::endl;
 				summary.close();
 			}
 		}

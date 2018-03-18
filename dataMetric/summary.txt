@@ -142,3 +142,10 @@
 5uzb_A_helix6, 2.13709
 5uzb_A_helix8, 2.06735
 5uzb_A_helix9, 2.16752
+5uzb_A_helix2, 1.99821
+5uzb_A_helix3, 2.07067
+5uzb_A_helix4, 2.06512
+5uzb_A_helix5, 2.05065
+5uzb_A_helix6, 2.13709
+5uzb_A_helix8, 2.06735
+5uzb_A_helix9, 2.15422
