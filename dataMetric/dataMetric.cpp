@@ -98,7 +98,7 @@ mrc cylinderCutOut(mrc &map, pdb &structure)
 	return near;
 }
 
-std::vector<pdb> runAxisComparison(std::string pdb_path)
+std::vector<pdb> runAxisComparisonForHelixGeneration(std::string pdb_path)
 {
 	using path = std::experimental::filesystem::path;
 
@@ -160,7 +160,7 @@ int main(int argc, char* argv[])
 	std::string mrc_file_path_in = argv[1];
 	std::string pdb_file_path_in = argv[2];
 	
-	std::vector<pdb> helices = runAxisComparison(pdb_file_path_in);
+	std::vector<pdb> helices = runAxisComparisonForHelixGeneration(pdb_file_path_in);
 
 	mrc entire_map(mrc_file_path_in);
 

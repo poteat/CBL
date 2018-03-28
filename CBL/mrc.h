@@ -518,6 +518,37 @@ namespace cbl
 			return std::make_tuple(near_map, far_map);
 		}
 
+		void merge(std::vector<mrc> mrc_stack)
+		{
+			for (int i = 0; i < header.nx; i++)
+			{
+				for (int j = 0; j < header.ny; j++)
+				{
+					for (int k = 0; k < header.nz; k++)
+					{
+						map(i, j, k) = 0;
+					}
+				}
+			}
+
+			for (int Z = 0; Z < mrc_stack.size(); Z++)
+			{
+				for (int i = 0; i < header.nx; i++)
+				{
+					for (int j = 0; j < header.ny; j++)
+					{
+						for (int k = 0; k < header.nz; k++)
+						{
+							if (mrc_stack[Z].map(i, j, k) > 0)
+							{
+								map(i, j, k) = mrc_stack[Z].map(i, j, k);
+							}
+						}
+					}
+				}
+			}
+		}
+
 		// This function is similar to crop, but is based on a cylindrical model instead
 		// of a spherical one.  The pdb input should be a linear sequence of positions with
 		// nearby values.
