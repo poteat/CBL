@@ -76,7 +76,7 @@ cbl::real applyLineData(mrc map, pdb structure, cbl::real deviation, std::string
 
 	std::cout << "Percentage zero: " << (cbl::real) count_zero / (cbl::real) line.error.size() << std::endl;
 
-	threshold_score *= (1.0 - (cbl::real) count_zero / (cbl::real) line.error.size());
+	threshold_score *= ((cbl::real) 1.0 - (cbl::real) count_zero / (cbl::real) line.error.size());
 
 	return threshold_score;
 }
