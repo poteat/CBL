@@ -520,24 +520,24 @@ namespace cbl
 
 		void merge(std::vector<mrc> mrc_stack)
 		{
-			for (int i = 0; i < header.nx; i++)
+			for (size_t i = 0; i < header.nx; i++)
 			{
-				for (int j = 0; j < header.ny; j++)
+				for (size_t j = 0; j < header.ny; j++)
 				{
-					for (int k = 0; k < header.nz; k++)
+					for (size_t k = 0; k < header.nz; k++)
 					{
 						map(i, j, k) = 0;
 					}
 				}
 			}
 
-			for (int Z = 0; Z < mrc_stack.size(); Z++)
+			for (size_t Z = 0; Z < mrc_stack.size(); Z++)
 			{
-				for (int i = 0; i < header.nx; i++)
+				for (size_t i = 0; i < header.nx; i++)
 				{
-					for (int j = 0; j < header.ny; j++)
+					for (size_t j = 0; j < header.ny; j++)
 					{
-						for (int k = 0; k < header.nz; k++)
+						for (size_t k = 0; k < header.nz; k++)
 						{
 							if (mrc_stack[Z].map(i, j, k) > 0)
 							{
