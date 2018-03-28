@@ -19,6 +19,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Utility", "Utility", "{47B3
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "runProgOnPair", "runProgOnPair\runProgOnPair.vcxproj", "{62A07481-ACA6-43A3-B8E6-C0EFC21D80EC}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "axisQualityMetric", "axisQualityMetric\axisQualityMetric.vcxproj", "{90E97570-F693-4219-AA00-3DACE69B9A11}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -73,6 +75,14 @@ Global
 		{62A07481-ACA6-43A3-B8E6-C0EFC21D80EC}.Release|Win32.Build.0 = Release|Win32
 		{62A07481-ACA6-43A3-B8E6-C0EFC21D80EC}.Release|x64.ActiveCfg = Release|x64
 		{62A07481-ACA6-43A3-B8E6-C0EFC21D80EC}.Release|x64.Build.0 = Release|x64
+		{90E97570-F693-4219-AA00-3DACE69B9A11}.Debug|Win32.ActiveCfg = Debug|Win32
+		{90E97570-F693-4219-AA00-3DACE69B9A11}.Debug|Win32.Build.0 = Debug|Win32
+		{90E97570-F693-4219-AA00-3DACE69B9A11}.Debug|x64.ActiveCfg = Debug|x64
+		{90E97570-F693-4219-AA00-3DACE69B9A11}.Debug|x64.Build.0 = Debug|x64
+		{90E97570-F693-4219-AA00-3DACE69B9A11}.Release|Win32.ActiveCfg = Release|Win32
+		{90E97570-F693-4219-AA00-3DACE69B9A11}.Release|Win32.Build.0 = Release|Win32
+		{90E97570-F693-4219-AA00-3DACE69B9A11}.Release|x64.ActiveCfg = Release|x64
+		{90E97570-F693-4219-AA00-3DACE69B9A11}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
