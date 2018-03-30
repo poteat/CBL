@@ -5,6 +5,7 @@
 #include <vector>
 #include <assert.h>
 #include <tuple>
+#include <stack>
 
 #include "core.h"
 #include "pdb.h"
@@ -212,7 +213,7 @@ namespace cbl
 								for (size_t K = 0; K < nz; K++)
 								{
 									real d = map(i + I - mid_x, j + J - mid_y, k + K - mid_z);
-									
+
 									kernel_function_input.push_back(d);
 								}
 							}
@@ -254,11 +255,11 @@ namespace cbl
 			int max_y = INT_MIN;
 			int max_z = INT_MIN;
 
-			for (int i = 0; i < (int) header.nx; i++)
+			for (int i = 0; i < (int)header.nx; i++)
 			{
-				for (int j = 0; j < (int) header.ny; j++)
+				for (int j = 0; j < (int)header.ny; j++)
 				{
-					for (int k = 0; k < (int) header.nz; k++)
+					for (int k = 0; k < (int)header.nz; k++)
 					{
 						real density = map(i, j, k);
 
@@ -547,6 +548,161 @@ namespace cbl
 					}
 				}
 			}
+		}
+
+		std::vector<mrc> cluster(int num_required_voxels = 0)
+		{
+			// Create a copy of the map, grouping voxels by setting their densities to successive
+			// negative integers, representing which cluster they belong to.
+
+			mrc groups = *this;
+
+			// Keep track of voxels yet to be categorized by pushing them onto a stack.  So, we can
+			// always get an uncategorized one if one exists.
+
+			struct index
+			{
+				index(size_t i, size_t j, size_t k) : i(i), j(j), k(k) {};
+				size_t i, j, k;
+			};
+
+			std::stack<index> uncategorized;
+
+			for (size_t i = 0; i < header.nx; i++)
+			{
+				for (size_t j = 0; j < header.ny; j++)
+				{
+					for (size_t k = 0; k < header.nz; k++)
+					{
+						if (map(i, j, k) > 0)
+						{
+							index ind(i, j, k);
+							uncategorized.push(ind);
+						}
+					}
+				}
+			}
+
+			// Create a stack of indices to visit next.  (Recursive to iterative form)
+
+			int iterations = 0;
+
+			real current_group = (real)-1;
+
+			while (uncategorized.size())
+			{
+				std::stack<index> add_to_group;
+
+				add_to_group.push(uncategorized.top());
+				uncategorized.pop();
+
+				bool group_had_elements = false;
+
+				while (add_to_group.size())
+				{
+					index ind = add_to_group.top();
+					add_to_group.pop();
+
+					auto &d = groups.map(ind.i, ind.j, ind.k);
+
+					if (d > 0)
+					{
+						d = current_group;
+
+						// Iterate through 6-neighborhood recursively
+
+						ind.i += 1;
+						add_to_group.push(ind);
+						ind.i -= 2;
+						add_to_group.push(ind);
+						ind.i += 1;
+
+						ind.j += 1;
+						add_to_group.push(ind);
+						ind.j -= 2;
+						add_to_group.push(ind);
+						ind.j += 1;
+
+						ind.k += 1;
+						add_to_group.push(ind);
+						ind.k -= 2;
+						add_to_group.push(ind);
+						ind.k += 1;
+
+						group_had_elements = true;
+					}
+				}
+
+				if (group_had_elements)
+				{
+					current_group -= (real)1;
+				}
+			}
+
+			int num_of_groups = (int)std::round(-current_group);
+
+			// Now all voxels in groups have a density corresponding to their connected cluster.
+			// Loop through and copy each voxel to the corresponding map in the return vector.
+
+
+			// Create copy of this map with density all zero to initialize cluster vector
+			mrc copy = *this;
+			copy.map = cube<real>(header.nx, header.ny, header.nz);
+
+			std::vector<mrc> clusters(num_of_groups, copy);
+
+			for (size_t i = 0; i < header.nx; i++)
+			{
+				for (size_t j = 0; j < header.ny; j++)
+				{
+					for (size_t k = 0; k < header.nz; k++)
+					{
+						auto &d = groups.map(i, j, k);
+
+						if (d < 0)
+						{
+							int index = (int)std::round(-d) - 1;
+
+							clusters[index].map(i, j, k) = map(i, j, k);
+						}
+					}
+				}
+			}
+
+			std::vector<mrc> filtered;
+
+			// Loop through clusters, including them in filtered vector only if they have a number
+			// of voxels greater than what input specifies
+
+			for (size_t i = 0; i < clusters.size(); i++)
+			{
+				mrc &m = clusters[i];
+
+				int num_voxels = 0;
+
+				for (size_t i = 0; i < header.nx; i++)
+				{
+					for (size_t j = 0; j < header.ny; j++)
+					{
+						for (size_t k = 0; k < header.nz; k++)
+						{
+							if (m.map(i, j, k) > 0)
+							{
+								num_voxels++;
+							}
+						}
+					}
+				}
+
+				if (num_voxels > num_required_voxels)
+				{
+					std::cout << num_voxels << std::endl;
+
+					filtered.push_back(m);
+				}
+			}
+
+			return filtered;
 		}
 
 		// This function is similar to crop, but is based on a cylindrical model instead

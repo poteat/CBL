@@ -126,15 +126,15 @@ namespace cbl
 
 			data.resize(_nx*_ny*_nz);
 
-			for (int k = 0; k < _nz; k++)
+			for (size_t k = 0; k < _nz; k++)
 			{
-				for (int j = 0; j < _ny; j++)
+				for (size_t j = 0; j < _ny; j++)
 				{
 					std::getline(file, line);
 					line = removeConsecutive(line, ' ');
 					elements = explode(line, ' ');
 
-					for (int i = 0; i < elements.size(); i++)
+					for (size_t i = 0; i < elements.size(); i++)
 					{
 						(*this)(i, j, k) = (real) std::stod(elements[i]);
 					}

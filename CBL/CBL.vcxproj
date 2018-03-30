@@ -94,6 +94,7 @@
     <ClInclude Include="mrc.h" />
     <ClInclude Include="off.h" />
     <ClInclude Include="pdb.h" />
+    <ClInclude Include="plane.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
