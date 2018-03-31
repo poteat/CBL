@@ -31,13 +31,13 @@ int main(int argc, char *argv[])
 
 	std::vector<mrc> sheet_list = sheet.cluster(70); // Exclude clusters less than 70 voxels
 
-	// Write individual clusters to disk
+													 // Write individual clusters to disk
 	for (size_t i = 0; i < sheet_list.size(); i++)
 	{
 		sheet_list[i].write(base_path + "_sheet" + std::to_string(i + 1) + ".mrc");
 	}
 
-	
+
 	// Create n planes based on filtered cluster vector
 
 	std::vector<plane> planes;
@@ -50,7 +50,7 @@ int main(int argc, char *argv[])
 
 
 	// Write individual planes to disk
-	
+
 	for (size_t i = 0; i < planes.size(); i++)
 	{
 		planes[i].write(base_path + "_plane" + std::to_string(i + 1) + ".pdb");
