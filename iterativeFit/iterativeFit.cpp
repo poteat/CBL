@@ -2,6 +2,7 @@
 #include <string>
 #include <functional>
 
+#include "mrc.h"
 #include "off.h"
 #include "plane.h"
 

@@ -550,6 +550,14 @@ namespace cbl
 			}
 		}
 
+		std::vector<mrc> kmeans()
+		{
+			// Choose a random position out of all voxels
+
+			// for (int i = 0; i < ma)
+
+		}
+
 		std::vector<mrc> cluster(int num_required_voxels = 0)
 		{
 			// Create a copy of the map, grouping voxels by setting their densities to successive
