@@ -163,7 +163,6 @@ namespace cbl
 		{
 			real threshold = multiplier * map.standard_deviation();
 
-			std::cout << threshold << std::endl;
 			applyThreshold(threshold);
 		}
 
@@ -552,10 +551,26 @@ namespace cbl
 
 		std::vector<mrc> kmeans()
 		{
-			// Choose a random position out of all voxels
+			// Construct vector of points that have density
 
-			// for (int i = 0; i < ma)
+			std::vector<struct cube<real>::voxel> set;
 
+			for (size_t i = 0; i < map.size(); i++)
+			{
+				auto v = map.voxel(i);
+
+				if (v.d)
+				{
+					set.push_back(v);
+				}
+			}
+
+			std::cout << "voxels: " << set.size() << std::endl;
+
+
+
+
+			return std::vector<mrc>();
 		}
 
 		std::vector<mrc> cluster(int num_required_voxels = 0)
@@ -704,8 +719,6 @@ namespace cbl
 
 				if (num_voxels > num_required_voxels)
 				{
-					std::cout << num_voxels << std::endl;
-
 					filtered.push_back(m);
 				}
 			}

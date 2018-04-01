@@ -78,6 +78,15 @@ namespace cbl
 	public:
 		cube() {};
 
+		struct voxel
+		{
+			voxel(size_t i, size_t j, size_t k, T d) : i(i), j(j), k(k), d(d) {};
+			operator point() { return point::point((real)i, (real)j, (real)k); };
+
+			size_t i, j, k;
+			T d;
+		};
+
 		cube(size_t nx, size_t ny, size_t nz) : _nx(nx), _ny(ny), _nz(nz), data(nx*ny*nz) {}
 
 		T &operator()(size_t i, size_t j, size_t k)
@@ -96,6 +105,16 @@ namespace cbl
 		T &operator[](size_t i)
 		{
 			return data[i];
+		}
+
+		voxel voxel(size_t n)
+		{
+			size_t i = n % _nx;
+			size_t k = n / _nx / _ny;
+			size_t j = (n - _nx * _ny * k - i) / _nx;
+			T d = this->operator()(i, j, k);
+
+			return voxel::voxel(i, j, k, d);
 		}
 
 		point point(size_t n)
