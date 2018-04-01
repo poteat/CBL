@@ -34,7 +34,7 @@ namespace cbl
 
 			// Count how many voxels in map are nonzero
 
-			int count = points.size();
+			size_t count = points.size();
 
 			// Cast point 'std::vector' as actual vector of R^3
 
