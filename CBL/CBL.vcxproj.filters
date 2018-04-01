@@ -1,0 +1,12 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClInclude Include="axis.h" />
+    <ClInclude Include="bezier.h" />
+    <ClInclude Include="core.h" />
+    <ClInclude Include="off.h" />
+    <ClInclude Include="pdb.h" />
+    <ClInclude Include="plane.h" />
+    <ClInclude Include="mrc.h" />
+  </ItemGroup>
+</Project>

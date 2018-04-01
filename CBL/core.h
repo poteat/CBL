@@ -78,7 +78,7 @@ namespace cbl
 	public:
 		cube() {};
 
-		cube(int nx, int ny, int nz) : _nx(nx), _ny(ny), _nz(nz), data(nx*ny*nz) {}
+		cube(size_t nx, size_t ny, size_t nz) : _nx(nx), _ny(ny), _nz(nz), data(nx*ny*nz) {}
 
 		T &operator()(size_t i, size_t j, size_t k)
 		{

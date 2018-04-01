@@ -22,7 +22,6 @@ int main(int argc, char *argv[])
 	off skeleton_mesh(argv[1]);
 	mrc original_map(argv[2]);
 
-
 	// Perform classification on original MRC file (CLAS)
 	mrc helix, sheet;
 	std::tie(helix, sheet) = skeleton_mesh.classify(original_map);

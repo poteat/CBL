@@ -311,9 +311,9 @@ namespace cbl
 		// Adds zero-padding to box on all six sides
 		void pad(size_t num)
 		{
-			int new_nx = header.nx += num * 2;
-			int new_ny = header.ny += num * 2;
-			int new_nz = header.nz += num * 2;
+			size_t new_nx = header.nx + num * 2;
+			size_t new_ny = header.ny + num * 2;
+			size_t new_nz = header.nz + num * 2;
 
 			auto new_map = cube<real>(new_nx, new_ny, new_nz);
 
@@ -328,9 +328,9 @@ namespace cbl
 				}
 			}
 
-			header.nx = new_nx;
-			header.ny = new_ny;
-			header.nz = new_nz;
+			header.nx = (unsigned int)new_nx;
+			header.ny = (unsigned int)new_ny;
+			header.nz = (unsigned int)new_nz;
 
 			header.xorigin -= num * scale;
 			header.yorigin -= num * scale;
