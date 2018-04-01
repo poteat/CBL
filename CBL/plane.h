@@ -57,12 +57,7 @@ namespace cbl
 
 			normal_vector = svd.matrixU().col(2);
 
-			std::cout << normal_vector << std::endl;
-
 			real error2 = 0;
-
-
-
 
 			t_basis = svd.matrixU().col(0);
 			u_basis = svd.matrixU().col(1);
@@ -133,32 +128,24 @@ namespace cbl
 				error2 += dist;
 			}
 
-
-			std::cout << error0 << " " << error1 << " " << error2 << std::endl;
-			
-
 			if (error0 < error1 && error0 < error2)
 			{
-				std::cout << "Error0 min" << std::endl;
 				normal_vector = col0;
 				t_basis = col1;
 				u_basis = col2;
 			}
 			else if (error1 < error0 && error1 < error2)
 			{
-				std::cout << "Error1 min" << std::endl;
 				normal_vector = col1;
 				t_basis = col0;
 				u_basis = col2;
 			}
 			else if (error2 < error0 && error2 < error1)
 			{
-				std::cout << "Error2 min" << std::endl;
 				normal_vector = col2;
 				t_basis = col0;
 				u_basis = col1;
 			}
-
 		}
 
 		void write(std::string file_name)

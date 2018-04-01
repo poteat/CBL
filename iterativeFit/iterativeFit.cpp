@@ -29,6 +29,8 @@ int main(int argc, char *argv[])
 
 	sheet.applyDeviationThreshold(2.75);
 
+	sheet.kmeans();
+
 	std::vector<mrc> sheet_list = sheet.cluster(70); // Exclude clusters less than 70 voxels
 
 													 // Write individual clusters to disk
