@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.27428.2011
+VisualStudioVersion = 15.0.27130.2036
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "_CBL", "CBL\CBL.vcxproj", "{47DE671E-63C8-4D0B-AF38-4D680D4D54EF}"
 EndProject
@@ -51,6 +51,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "runProgOnPair", "runProgOnP
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Utility", "Utility", "{9192DA7E-DE40-4BFB-8A57-6D03D7DBD748}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "halfPoints", "halfPoints\halfPoints.vcxproj", "{9285262E-BAF7-40BC-BAD5-98FED3C27FBA}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -130,6 +132,14 @@ Global
 		{62A07481-ACA6-43A3-B8E6-C0EFC21D80EC}.Release|x64.Build.0 = Release|x64
 		{62A07481-ACA6-43A3-B8E6-C0EFC21D80EC}.Release|x86.ActiveCfg = Release|Win32
 		{62A07481-ACA6-43A3-B8E6-C0EFC21D80EC}.Release|x86.Build.0 = Release|Win32
+		{9285262E-BAF7-40BC-BAD5-98FED3C27FBA}.Debug|x64.ActiveCfg = Debug|x64
+		{9285262E-BAF7-40BC-BAD5-98FED3C27FBA}.Debug|x64.Build.0 = Debug|x64
+		{9285262E-BAF7-40BC-BAD5-98FED3C27FBA}.Debug|x86.ActiveCfg = Debug|Win32
+		{9285262E-BAF7-40BC-BAD5-98FED3C27FBA}.Debug|x86.Build.0 = Debug|Win32
+		{9285262E-BAF7-40BC-BAD5-98FED3C27FBA}.Release|x64.ActiveCfg = Release|x64
+		{9285262E-BAF7-40BC-BAD5-98FED3C27FBA}.Release|x64.Build.0 = Release|x64
+		{9285262E-BAF7-40BC-BAD5-98FED3C27FBA}.Release|x86.ActiveCfg = Release|Win32
+		{9285262E-BAF7-40BC-BAD5-98FED3C27FBA}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

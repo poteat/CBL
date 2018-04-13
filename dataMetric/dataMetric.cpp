@@ -154,18 +154,56 @@ std::vector<pdb> runAxisComparisonForHelixGeneration(std::string pdb_path)
 
 cbl::pdb cylinderFitting(mrc &map, pdb &structure)
 {
-	//Fit a cylinder to the true structure and find error to the cylinder
+	//Fit a cylinder to the true structure
 
 	pdb cylinder;
+	cbl::real x, y, z;
+	cbl::real minx, maxx;
+	cbl::real miny, maxy;
+	cbl::real minz, maxz;
+	minx = INFINITY;
+	miny = INFINITY;
+	minz = INFINITY;
+	maxx = 0;
+	maxy = 0;
+	maxz = 0;
 
 	for (int i = 0; i < structure.size(); i++)
 	{
+		x = structure[i].x;
+		y = structure[i].y;
+		z = structure[i].z;
 
-
-
+		if (x > maxx)
+			maxx = x;
+		if (y > maxy)
+			maxy = y;
+		if (z > maxz)
+			maxz = z;
+		if (x < maxx)
+			minx = x;
+		if (x < maxx)
+			miny = y;
+		if (x < maxx)
+			minz = z;
 	}
 
-	//cylinder.emplace_back();
+	cbl::real xdenominator, ydenominator, zdenominator;
+	xdenominator = .5*((maxx - minx)*(maxx - minx));
+	ydenominator = .5*((maxy - miny)*(maxy - miny));
+	zdenominator = .5*((maxz - minz)*(maxz - minz));
+
+	for (int i = 0; i < structure.size(); i++)
+	{
+		x = structure[i].x;
+		y = structure[i].y;
+		z = structure[i].z;
+
+		//cylinder.emplace_back((x*x) / xdenominator, (y*y) / ydenominator, (z*z) / zdenominator);
+		//not correct currently, we only want the points where these three values added together equal 2.5 
+		//On the bright side, using this formula we can get the distance from the surface directly
+		//i.e. if less than 2.5, the difference is the distance from the surface
+	}
 
 	return cylinder;
 }
