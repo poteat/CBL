@@ -152,6 +152,149 @@ std::vector<pdb> runAxisComparisonForHelixGeneration(std::string pdb_path)
 	return matched_helix;
 }
 
+std::vector<pdb> cylinderFitting(mrc &map, pdb &structure, std::string pdb_path)
+{
+	//Fit a cylinder to the true structure and find error to the cylinder
+
+	pdb cylinder;
+
+	for (int i = 0; i < structure.size(); i++)
+	{
+
+
+
+	}
+
+	//cylinder.emplace_back();
+
+	pdb_path = pdb_path + "_autoCylinder.pdb";
+
+	cylinder.write(pdb_path);
+}
+std::vector<pdb> halfPoints(pdb &structure, std::string pdb_path)
+{
+	//vectors for the increment or decrement of each axis
+	std::vector<float> x, y, z;
+
+	for (int i = 0; i < structure.size() - 1 ; i++)
+	{
+		x.push_back(structure[i].x - structure[i + 1].x);
+		y.push_back(structure[i].y - structure[i + 1].y);
+		z.push_back(structure[i].z - structure[i + 1].z);
+	}
+
+	int switch1, switch2, switch3 = 0;
+	
+	for (int i = 0; i < structure.size() - 1; i++)
+	{
+		if ((x[i] > 0 && x[i + 1] < 0) || (x[i] < 0 && x[i + 1] > 0))
+			switch1++;
+		if ((y[i] > 0 && y[i + 1] < 0) || (y[i] < 0 && y[i + 1] > 0))
+			switch2++;
+		if ((z[i] > 0 && z[i + 1] < 0) || (z[i] < 0 && z[i + 1] > 0))
+			switch3++;
+	}
+
+	//the vector with the least amount of direction changes will be the main axis
+
+	int values[3] = { switch1, switch2, switch3 };
+	std::sort(values, values + 3);
+
+	char line;
+	
+	if (values[0] == switch1)
+		line = 'x';
+	if (values[0] == switch2)
+		line = 'y';
+	if (values[0] == switch3)
+		line = 'z';
+
+	//If a single helix folds in half, list points inbetween the two segments
+
+	if (values[0] > 0)
+	{
+		pdb halfPoints;
+
+		//write any mid-points to file
+
+		if (line == 'x')
+		{
+			for (int i = 0; i < x.size() - 1; i++)
+			{
+				if ((x[i] > 0 && x[i + 1] < 0) || (x[i] < 0 && x[i + 1] > 0))
+				{
+					int l_shift, r_shift = i + 1;
+					cbl::real x1, y1, z1;
+
+					while (l_shift > -1 && r_shift < x.size() + 1)
+					{
+						l_shift -= 1;
+						r_shift += 1;
+
+						x1 = (structure[l_shift].x + structure[r_shift].x) / 2;
+						y1 = (structure[l_shift].y + structure[r_shift].y) / 2;
+						z1 = (structure[l_shift].z + structure[r_shift].z) / 2;
+
+						halfPoints.emplace_back(x1, y1, z1);
+					}
+				}
+			}
+		}
+
+		if (line == 'y')
+		{
+			for (int i = 0; i < y.size() - 1; i++)
+			{
+				if ((y[i] > 0 && y[i + 1] < 0) || (y[i] < 0 && y[i + 1] > 0))
+				{
+					int l_shift, r_shift = i + 1;
+					cbl::real x1, y1, z1;
+
+					while (l_shift > -1 && r_shift < y.size() + 1)
+					{
+						l_shift -= 1;
+						r_shift += 1;
+
+						x1 = (structure[l_shift].x + structure[r_shift].x) / 2;
+						y1 = (structure[l_shift].y + structure[r_shift].y) / 2;
+						z1 = (structure[l_shift].z + structure[r_shift].z) / 2;
+
+						halfPoints.emplace_back(x1, y1, z1);
+					}
+				}
+			}
+		}
+
+		if (line == 'z')
+		{
+			for (int i = 0; i < z.size() - 1; i++)
+			{
+				if ((z[i] > 0 && z[i + 1] < 0) || (z[i] < 0 && z[i + 1] > 0))
+				{
+					int l_shift, r_shift = i + 1;
+					cbl::real x1, y1, z1;
+
+					while (l_shift > -1 && r_shift < z.size() + 1)
+					{
+						l_shift -= 1;
+						r_shift += 1;
+
+						x1 = (structure[l_shift].x + structure[r_shift].x) / 2;
+						y1 = (structure[l_shift].y + structure[r_shift].y) / 2;
+						z1 = (structure[l_shift].z + structure[r_shift].z) / 2;
+
+						halfPoints.emplace_back(x1, y1, z1);
+					}
+				}
+			}
+		}
+
+		pdb_path = pdb_path + "_halfPoints.pdb";
+
+		halfPoints.write(pdb_path);
+	}
+}
+
 int main(int argc, char* argv[])
 {
 	int num_args = 2;
@@ -185,6 +328,10 @@ int main(int argc, char* argv[])
 			helix_mrc.normalize();
 
 			helix_mrc.write(cropped_file_path_out);
+
+			//cylinderFitting(helix_mrc, helix, pdb_file_path_in);
+
+			//halfPoints(helix, pdb_file_path_in);
 
 			std::ofstream score_out_file(quant_file_path_out);
 			std::vector<cbl::real> threshold_score;
