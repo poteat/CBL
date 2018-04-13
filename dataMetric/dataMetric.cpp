@@ -152,7 +152,7 @@ std::vector<pdb> runAxisComparisonForHelixGeneration(std::string pdb_path)
 	return matched_helix;
 }
 
-std::vector<pdb> cylinderFitting(mrc &map, pdb &structure, std::string pdb_path)
+void cylinderFitting(mrc &map, pdb &structure, std::string pdb_path)
 {
 	//Fit a cylinder to the true structure and find error to the cylinder
 
@@ -171,7 +171,7 @@ std::vector<pdb> cylinderFitting(mrc &map, pdb &structure, std::string pdb_path)
 
 	cylinder.write(pdb_path);
 }
-std::vector<pdb> halfPoints(pdb &structure, std::string pdb_path)
+void halfPoints(pdb &structure, std::string pdb_path)
 {
 	//vectors for the increment or decrement of each axis
 	std::vector<float> x, y, z;
@@ -183,8 +183,11 @@ std::vector<pdb> halfPoints(pdb &structure, std::string pdb_path)
 		z.push_back(structure[i].z - structure[i + 1].z);
 	}
 
-	int switch1, switch2, switch3 = 0;
-	
+	int switch1, switch2, switch3;
+	switch1 = 0;
+	switch2 = 0;
+	switch3 = 0;
+
 	for (int i = 0; i < structure.size() - 1; i++)
 	{
 		if ((x[i] > 0 && x[i + 1] < 0) || (x[i] < 0 && x[i + 1] > 0))
@@ -214,6 +217,8 @@ std::vector<pdb> halfPoints(pdb &structure, std::string pdb_path)
 	if (values[0] > 0)
 	{
 		pdb halfPoints;
+		int l_shift, r_shift;
+		cbl::real x1, y1, z1;
 
 		//write any mid-points to file
 
@@ -223,9 +228,9 @@ std::vector<pdb> halfPoints(pdb &structure, std::string pdb_path)
 			{
 				if ((x[i] > 0 && x[i + 1] < 0) || (x[i] < 0 && x[i + 1] > 0))
 				{
-					int l_shift, r_shift = i + 1;
-					cbl::real x1, y1, z1;
-
+					l_shift = i + 1;
+					r_shift = i + 1;
+					
 					while (l_shift > -1 && r_shift < x.size() + 1)
 					{
 						l_shift -= 1;
@@ -247,8 +252,8 @@ std::vector<pdb> halfPoints(pdb &structure, std::string pdb_path)
 			{
 				if ((y[i] > 0 && y[i + 1] < 0) || (y[i] < 0 && y[i + 1] > 0))
 				{
-					int l_shift, r_shift = i + 1;
-					cbl::real x1, y1, z1;
+					l_shift = i + 1;
+					r_shift = i + 1;
 
 					while (l_shift > -1 && r_shift < y.size() + 1)
 					{
@@ -271,8 +276,8 @@ std::vector<pdb> halfPoints(pdb &structure, std::string pdb_path)
 			{
 				if ((z[i] > 0 && z[i + 1] < 0) || (z[i] < 0 && z[i + 1] > 0))
 				{
-					int l_shift, r_shift = i + 1;
-					cbl::real x1, y1, z1;
+					l_shift = i + 1;
+					r_shift = i + 1;
 
 					while (l_shift > -1 && r_shift < z.size() + 1)
 					{
@@ -289,9 +294,9 @@ std::vector<pdb> halfPoints(pdb &structure, std::string pdb_path)
 			}
 		}
 
-		pdb_path = pdb_path + "_halfPoints.pdb";
+		//pdb_path = pdb_path + "_halfPoints.pdb";
 
-		halfPoints.write(pdb_path);
+		halfPoints.write("halfPoints.pdb");
 	}
 }
 
@@ -331,7 +336,7 @@ int main(int argc, char* argv[])
 
 			//cylinderFitting(helix_mrc, helix, pdb_file_path_in);
 
-			//halfPoints(helix, pdb_file_path_in);
+			halfPoints(helix, pdb_file_path_in);
 
 			std::ofstream score_out_file(quant_file_path_out);
 			std::vector<cbl::real> threshold_score;
