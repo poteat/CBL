@@ -152,7 +152,7 @@ std::vector<pdb> runAxisComparisonForHelixGeneration(std::string pdb_path)
 	return matched_helix;
 }
 
-void cylinderFitting(mrc &map, pdb &structure, std::string pdb_path)
+cbl::pdb cylinderFitting(mrc &map, pdb &structure)
 {
 	//Fit a cylinder to the true structure and find error to the cylinder
 
@@ -167,137 +167,7 @@ void cylinderFitting(mrc &map, pdb &structure, std::string pdb_path)
 
 	//cylinder.emplace_back();
 
-	pdb_path = pdb_path + "_autoCylinder.pdb";
-
-	cylinder.write(pdb_path);
-}
-void halfPoints(pdb &structure, std::string pdb_path)
-{
-	//vectors for the increment or decrement of each axis
-	std::vector<float> x, y, z;
-
-	for (int i = 0; i < structure.size() - 1 ; i++)
-	{
-		x.push_back(structure[i].x - structure[i + 1].x);
-		y.push_back(structure[i].y - structure[i + 1].y);
-		z.push_back(structure[i].z - structure[i + 1].z);
-	}
-
-	int switch1, switch2, switch3;
-	switch1 = 0;
-	switch2 = 0;
-	switch3 = 0;
-
-	for (int i = 0; i < structure.size() - 1; i++)
-	{
-		if ((x[i] > 0 && x[i + 1] < 0) || (x[i] < 0 && x[i + 1] > 0))
-			switch1++;
-		if ((y[i] > 0 && y[i + 1] < 0) || (y[i] < 0 && y[i + 1] > 0))
-			switch2++;
-		if ((z[i] > 0 && z[i + 1] < 0) || (z[i] < 0 && z[i + 1] > 0))
-			switch3++;
-	}
-
-	//the vector with the least amount of direction changes will be the main axis
-
-	int values[3] = { switch1, switch2, switch3 };
-	std::sort(values, values + 3);
-
-	char line;
-	
-	if (values[0] == switch1)
-		line = 'x';
-	if (values[0] == switch2)
-		line = 'y';
-	if (values[0] == switch3)
-		line = 'z';
-
-	//If a single helix folds in half, list points inbetween the two segments
-
-	if (values[0] > 0)
-	{
-		pdb halfPoints;
-		int l_shift, r_shift;
-		cbl::real x1, y1, z1;
-
-		//write any mid-points to file
-
-		if (line == 'x')
-		{
-			for (int i = 0; i < x.size() - 1; i++)
-			{
-				if ((x[i] > 0 && x[i + 1] < 0) || (x[i] < 0 && x[i + 1] > 0))
-				{
-					l_shift = i + 1;
-					r_shift = i + 1;
-					
-					while (l_shift > -1 && r_shift < x.size() + 1)
-					{
-						l_shift -= 1;
-						r_shift += 1;
-
-						x1 = (structure[l_shift].x + structure[r_shift].x) / 2;
-						y1 = (structure[l_shift].y + structure[r_shift].y) / 2;
-						z1 = (structure[l_shift].z + structure[r_shift].z) / 2;
-
-						halfPoints.emplace_back(x1, y1, z1);
-					}
-				}
-			}
-		}
-
-		if (line == 'y')
-		{
-			for (int i = 0; i < y.size() - 1; i++)
-			{
-				if ((y[i] > 0 && y[i + 1] < 0) || (y[i] < 0 && y[i + 1] > 0))
-				{
-					l_shift = i + 1;
-					r_shift = i + 1;
-
-					while (l_shift > -1 && r_shift < y.size() + 1)
-					{
-						l_shift -= 1;
-						r_shift += 1;
-
-						x1 = (structure[l_shift].x + structure[r_shift].x) / 2;
-						y1 = (structure[l_shift].y + structure[r_shift].y) / 2;
-						z1 = (structure[l_shift].z + structure[r_shift].z) / 2;
-
-						halfPoints.emplace_back(x1, y1, z1);
-					}
-				}
-			}
-		}
-
-		if (line == 'z')
-		{
-			for (int i = 0; i < z.size() - 1; i++)
-			{
-				if ((z[i] > 0 && z[i + 1] < 0) || (z[i] < 0 && z[i + 1] > 0))
-				{
-					l_shift = i + 1;
-					r_shift = i + 1;
-
-					while (l_shift > -1 && r_shift < z.size() + 1)
-					{
-						l_shift -= 1;
-						r_shift += 1;
-
-						x1 = (structure[l_shift].x + structure[r_shift].x) / 2;
-						y1 = (structure[l_shift].y + structure[r_shift].y) / 2;
-						z1 = (structure[l_shift].z + structure[r_shift].z) / 2;
-
-						halfPoints.emplace_back(x1, y1, z1);
-					}
-				}
-			}
-		}
-
-		//pdb_path = pdb_path + "_halfPoints.pdb";
-
-		halfPoints.write("halfPoints.pdb");
-	}
+	return cylinder;
 }
 
 int main(int argc, char* argv[])
@@ -326,17 +196,17 @@ int main(int argc, char* argv[])
 			std::string data_result;
 
 			std::string quant_file_path_out = mrc_file_path_in + std::to_string(i + 1) + "_quantification.txt";
-			std::string cropped_file_path_out = mrc_file_path_in + std::to_string(i + 1) + "_chopped.mrc_";
+			std::string cropped_file_path_out = mrc_file_path_in + std::to_string(i + 1) + "_chopped.mrc";
 			std::string scatter_file_path_out = mrc_file_path_in + std::to_string(i + 1) + "_scatter.txt";
+			std::string cylinder_file_path_out = mrc_file_path_in + std::to_string(i + 1) + "_cylinder.pdb";
 
 			mrc helix_mrc = cylinderCutOut(entire_map, helix);
 			helix_mrc.normalize();
 
 			helix_mrc.write(cropped_file_path_out);
 
-			//cylinderFitting(helix_mrc, helix, pdb_file_path_in);
-
-			halfPoints(helix, pdb_file_path_in);
+			pdb cylinder = cylinderFitting(helix_mrc, helix);
+			cylinder.write(cylinder_file_path_out);
 
 			std::ofstream score_out_file(quant_file_path_out);
 			std::vector<cbl::real> threshold_score;
@@ -389,6 +259,13 @@ int main(int argc, char* argv[])
 				summary << mrc_file_path_in << i+1 << ", " << avg_variance << std::endl;
 				summary.close();
 			}
+		}
+		else if (helix.size == 1)
+		{
+			pdb cylinder = cylinderFitting(entire_map, helix);
+
+			std::string cylinder_file_path_out = mrc_file_path_in + "_cylinder.pdb";
+			cylinder.write(cylinder_file_path_out);
 		}
 	}
 
