@@ -8,5 +8,6 @@
     <ClInclude Include="pdb.h" />
     <ClInclude Include="plane.h" />
     <ClInclude Include="mrc.h" />
+    <ClInclude Include="clusterizer.h" />
   </ItemGroup>
 </Project>

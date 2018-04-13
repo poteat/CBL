@@ -43,6 +43,7 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
+    <CodeAnalysisRuleSet>NativeRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
@@ -94,6 +95,7 @@
   <ItemGroup>
     <ClInclude Include="axis.h" />
     <ClInclude Include="bezier.h" />
+    <ClInclude Include="clusterizer.h" />
     <ClInclude Include="core.h" />
     <ClInclude Include="mrc.h" />
     <ClInclude Include="off.h" />

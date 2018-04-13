@@ -12,7 +12,7 @@ int main(int argc, char *argv[])
 {
 	// Confirm we have correct number of arguments
 	int num_arguments = 5;
-	assert(argc == num_arguments + 1 && "Incorrect number of arguments (Needs 5)");
+	assert(argc == num_arguments + 1 && "Usage: input.mrc input.pdb dist out_near.mrc out_far.mrc");
 
 	// Read in each input
 	mrc in_mrc(argv[1]);

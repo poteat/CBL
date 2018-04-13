@@ -6,6 +6,7 @@
 #include <assert.h>
 #include <tuple>
 #include <stack>
+#include <random>
 
 #include "core.h"
 #include "pdb.h"
@@ -106,6 +107,10 @@ namespace cbl
 
 		void write(std::string file_name)
 		{
+			assert(map.count() > 0 && "Attempted to write MRC file with no positive density");
+
+			updateHeaderMetadata();
+
 			std::ofstream file(file_name, std::ios::binary);
 
 			file.write((char*)&header, 1024);
@@ -122,6 +127,15 @@ namespace cbl
 			}
 
 			file.close();
+		}
+
+		void updateHeaderMetadata()
+		{
+			// Update min, mean, and max density values
+
+			header.amin = map.min();
+			header.amean = map.mean();
+			header.amax = map.max();
 		}
 
 		void print()
@@ -155,13 +169,19 @@ namespace cbl
 
 			for (size_t i = 0; i < map.size(); i++)
 			{
-				map[i] = (map[i] - min) / (max - min);
+				if (map[i] > 0)
+				{
+					map[i] = (map[i] - min) / (max - min);
+				}
+
 			}
 		}
 
 		void applyDeviationThreshold(real multiplier)
 		{
 			real threshold = multiplier * map.standard_deviation();
+
+			std::cout << "Applying threshold " << threshold << std::endl;
 
 			applyThreshold(threshold);
 		}
@@ -338,16 +358,21 @@ namespace cbl
 			map = new_map;
 		}
 
-		point pdbSpaceVoxel(size_t n)
+		cube<real>::voxel transformVoxel(cube<real>::voxel vox)
 		{
-			point voxel = map.point(n);
-
 			// Compute "real-space" coordinates from (i,j,k)
-			voxel.x = voxel.x * scale + header.xorigin;
-			voxel.y = voxel.y * scale + header.yorigin;
-			voxel.z = voxel.z * scale + header.zorigin;
+			vox.x = vox.x * scale + header.xorigin;
+			vox.y = vox.y * scale + header.yorigin;
+			vox.z = vox.z * scale + header.zorigin;
 
-			return voxel;
+			return vox;
+		}
+
+		cube<real>::voxel getTransformedVoxel(size_t n)
+		{
+			cube<real>::voxel vox = map.getVoxel(n);
+
+			return transformVoxel(vox);
 		}
 
 		void apply(cube<real> &kernel)
@@ -471,6 +496,8 @@ namespace cbl
 
 		std::tuple<mrc, mrc> crop(pdb& pdb, real cropping_dist)
 		{
+			assert(pdb.size() > 0 && "Attempted MRC crop on empty PDB");
+
 			mrc near_map(*this);
 			mrc far_map(*this);
 
@@ -549,31 +576,7 @@ namespace cbl
 			}
 		}
 
-		std::vector<mrc> kmeans()
-		{
-			// Construct vector of points that have density
-
-			std::vector<struct cube<real>::voxel> set;
-
-			for (size_t i = 0; i < map.size(); i++)
-			{
-				auto v = map.voxel(i);
-
-				if (v.d)
-				{
-					set.push_back(v);
-				}
-			}
-
-			std::cout << "voxels: " << set.size() << std::endl;
-
-
-
-
-			return std::vector<mrc>();
-		}
-
-		std::vector<mrc> cluster(int num_required_voxels = 0)
+		std::vector<mrc> clusterViaConnectivity(int num_required_voxels = 0)
 		{
 			// Create a copy of the map, grouping voxels by setting their densities to successive
 			// negative integers, representing which cluster they belong to.
