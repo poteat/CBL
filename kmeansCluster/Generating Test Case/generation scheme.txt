@@ -1,0 +1,3 @@
+Test case generated with cropMRCFromPDB 1a12.mrc 1a12_strands.pdb 3 strands.mrc other.mrc
+
+(Separated with 3A distance parameter)

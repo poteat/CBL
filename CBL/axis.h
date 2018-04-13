@@ -126,7 +126,7 @@ namespace cbl
 
 			for (size_t i = 0; i < m.map.size(); i++)
 			{
-				point voxel = m.pdbSpaceVoxel(i);
+				point voxel = m.getTransformedVoxel(i);
 				real density = m.map[i];
 
 				if (density > 0)

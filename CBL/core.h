@@ -11,8 +11,6 @@
 
 namespace cbl
 {
-	using namespace Eigen;
-
 	typedef float real;
 	real Infinity = std::numeric_limits<real>::max();
 
@@ -39,7 +37,7 @@ namespace cbl
 			return sqrt(distSq(p.x, p.y, p.z));
 		}
 
-		void set(Vector3f &v)
+		void set(Eigen::Vector3f &v)
 		{
 			x = v[0];
 			y = v[1];
@@ -49,13 +47,14 @@ namespace cbl
 		// Rotate theta degrees around {ux, uy, uz} relative to center {_x, _y, _z}
 		void rotate(real _x, real _y, real _z, real ux, real uy, real uz, real theta)
 		{
-			Vector3f w = { ux, uy, uz }; // rotation axis
+			Eigen::Vector3f w = { ux, uy, uz }; // rotation axis
 			w.normalize(); // Make sure rotation axis is unit vector
 
-			Vector3f c = { _x, _y, _z }; // center of rotation
-			Affine3f A = Translation3f(c) * AngleAxisf(theta, w) * Translation3f(-c);
+			Eigen::Vector3f c = { _x, _y, _z }; // center of rotation
+			Eigen::Affine3f A = Eigen::Translation3f(c) * Eigen::AngleAxisf(theta, w) * 
+				Eigen::Translation3f(-c);
 
-			Vector3f p = { x, y, z };
+			Eigen::Vector3f p = { x, y, z };
 			p = A * p;
 
 			set(p);
@@ -80,10 +79,42 @@ namespace cbl
 
 		struct voxel
 		{
-			voxel(size_t i, size_t j, size_t k, T d) : i(i), j(j), k(k), d(d) {};
-			operator point() { return point::point((real)i, (real)j, (real)k); };
+			voxel() : x(0), y(0), z(0), d(0) {};
+			voxel(real x, real y, real z, T d) : x(x), y(y), z(z), d(d) {};
+			operator point() { return point::point(x, y, z); };
 
-			size_t i, j, k;
+			bool operator<(const voxel &rhs) const
+			{
+				return (x < rhs.x) && (y < rhs.y) && (z < rhs.z);
+			};
+
+			voxel& operator+=(const voxel& rhs)
+			{
+				x += rhs.x;
+				y += rhs.y;
+				z += rhs.z;
+				d += rhs.d;
+				
+				return *this;
+			}
+
+			voxel& operator/=(real div)
+			{
+				x /= div;
+				y /= div;
+				z /= div;
+				d /= div;
+
+				return *this;
+			}
+
+			real dist(const voxel &o) const
+			{
+				return std::sqrt(std::pow(x - o.x, 2) + std::pow(y - o.y, 2) + 
+					std::pow(z - o.z, 2));
+			}
+
+			real x, y, z;
 			T d;
 		};
 
@@ -107,23 +138,44 @@ namespace cbl
 			return data[i];
 		}
 
-		voxel voxel(size_t n)
+		voxel getVoxel(size_t n)
 		{
 			size_t i = n % _nx;
 			size_t k = n / _nx / _ny;
 			size_t j = (n - _nx * _ny * k - i) / _nx;
-			T d = this->operator()(i, j, k);
+			real d = data[n];
 
-			return voxel::voxel(i, j, k, d);
+			return voxel::voxel((real)i, (real)j, (real)k, d);
 		}
 
-		point point(size_t n)
+		std::vector<voxel> getAllVoxels()
 		{
-			size_t i = n % _nx;
-			size_t k = n / _nx / _ny;
-			size_t j = (n - _nx * _ny * k - i) / _nx;
+			std::vector<voxel> v;
 
-			return point::point((real)i, (real)j, (real)k);
+			for (size_t i = 0; i < data.size(); i++)
+			{
+				if (data[i] > 0)
+				{
+					v.push_back(getVoxel(i));
+				}
+			}
+
+			return v;
+		}
+
+		void setAllVoxels(std::vector<voxel> vec)
+		{
+			std::fill(data.begin(), data.end(), (real)0.0);
+
+			for (auto vox : vec)
+			{
+				size_t i = (size_t)std::round(vox.x);
+				size_t j = (size_t)std::round(vox.y);
+				size_t k = (size_t)std::round(vox.z);
+				real d = vox.d;
+
+				this->operator()(i, j, k) = d;
+			}
 		}
 
 		size_t size()
@@ -179,24 +231,51 @@ namespace cbl
 			}
 		}
 
-		T min()
+		T min(bool include_zero = false)
 		{
-			return *std::min_element(data.begin(), data.end());
+			real min = Infinity;
+			for (size_t i = 0; i < data.size(); i++)
+			{
+				if (include_zero || data[i] > 0)
+				{
+					if (data[i] < min)
+					{
+						min = data[i];
+					}
+				}
+			}
+
+			return min;
 		}
 
-		T max()
+		T max(bool include_zero = false)
 		{
 			return *std::max_element(data.begin(), data.end());
 		}
 
-		T mean()
+		T mean(bool include_zero = false)
 		{
 			T sum = 0;
-			int count = 0;
-			auto f = [&](T x) {sum += x; count += x > 0; };
-			std::for_each(data.begin(), data.end(), f);
-			sum /= count;
-			return sum;
+			size_t count = 0;
+
+			if (include_zero)
+			{
+				auto f = [&](T x) {sum += x; count++; };
+				std::for_each(data.begin(), data.end(), f);
+			}
+			else
+			{
+				auto f = [&](T x) {sum += x * (x > 0); count += x > 0; };
+				std::for_each(data.begin(), data.end(), f);
+			}
+
+			return sum / count;
+		}
+
+		size_t count()
+		{
+			// Return number of voxels > 0
+			return std::count_if(data.begin(), data.end(), [](T x) {return x > 0; });
 		}
 
 		T variance()
@@ -217,11 +296,11 @@ namespace cbl
 
 		void rotate(real _x, real _y, real _z, real ux, real uy, real uz, real theta)
 		{
-			Vector3f w = { ux, uy, uz }; // rotation axis
+			Eigen::Vector3f w = { ux, uy, uz }; // rotation axis
 			w.normalize(); // Make sure rotation axis is unit vector
 
-			Vector3f c = { _x, _y, _z }; // center of rotation
-			Affine3f A = Translation3f(c) * AngleAxisf(theta, w) * Translation3f(-c);
+			Eigen::Vector3f c = { _x, _y, _z }; // center of rotation
+			Eigen::Affine3f A = Translation3f(c) * AngleAxisf(theta, w) * Translation3f(-c);
 
 			for (int i = 0; i < _nx; i++)
 			{
@@ -234,7 +313,7 @@ namespace cbl
 				}
 			}
 
-			Vector3f p = { x, y, z };
+			Eigen::Vector3f p = { x, y, z };
 			p = A * p;
 
 			set(p);

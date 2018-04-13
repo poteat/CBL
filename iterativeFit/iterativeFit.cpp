@@ -5,6 +5,7 @@
 #include "mrc.h"
 #include "off.h"
 #include "plane.h"
+#include "clusterizer.h"
 
 using namespace cbl;
 
@@ -19,7 +20,6 @@ int main(int argc, char *argv[])
 	size_t period_pos = base_path.find_last_of('.');
 	base_path.resize(period_pos);
 
-
 	off skeleton_mesh(argv[1]);
 	mrc original_map(argv[2]);
 
@@ -27,39 +27,33 @@ int main(int argc, char *argv[])
 	mrc helix, sheet;
 	std::tie(helix, sheet) = skeleton_mesh.classify(original_map);
 
-	sheet.applyDeviationThreshold(2.75);
+	sheet.normalize();
 
-	sheet.kmeans();
+	sheet.applyDeviationThreshold(2.5);
 
-	std::vector<mrc> sheet_list = sheet.cluster(70); // Exclude clusters less than 70 voxels
+	sheet.normalize();
 
-													 // Write individual clusters to disk
+	std::vector<mrc> sheet_list = sheet.clusterViaConnectivity(70); // Exclude clusters less than 70 voxels
+
+	// Write individual clusters to disk and normalize
 	for (size_t i = 0; i < sheet_list.size(); i++)
 	{
+		sheet_list[i].normalize();
 		sheet_list[i].write(base_path + "_sheet" + std::to_string(i + 1) + ".mrc");
 	}
 
-
 	// Create n planes based on filtered cluster vector
-
 	std::vector<plane> planes;
-
 	for (size_t i = 0; i < sheet_list.size(); i++)
 	{
 		planes.emplace_back(sheet_list[i]);
 	}
 
-
-
 	// Write individual planes to disk
-
 	for (size_t i = 0; i < planes.size(); i++)
 	{
 		planes[i].write(base_path + "_plane" + std::to_string(i + 1) + ".pdb");
 	}
-
-
-
 
 	pdb pdb_off_file = skeleton_mesh.convertToPDB(original_map);
 

@@ -39,7 +39,7 @@ namespace cbl
 				line = removeConsecutive(line, ' ');
 				elements = explode(line, ' ');
 
-				if (elements.size() == 9 && elements[0] == "ATOM")
+				if (elements[0] == "ATOM")
 				{
 					std::string atom = elements[2];
 					real x = (real) std::stod(elements[6]);
@@ -49,8 +49,6 @@ namespace cbl
 					points.emplace_back(x, y, z, atom);
 				}
 			}
-
-			std::cout << "Read " << points.size() << " atoms from " << file_name << std::endl;
 		};
 
 		pdb(std::vector<pdb> inputs)
@@ -69,6 +67,11 @@ namespace cbl
 		void emplace_back(real x, real y, real z, std::string atom = "H")
 		{
 			points.emplace_back(x, y, z, atom);
+		};
+
+		void emplace_back(cbl::point p, std::string atom = "H")
+		{
+			points.emplace_back(p.x, p.y, p.z, atom);
 		};
 
 		void write(std::string file_name)
@@ -108,7 +111,7 @@ namespace cbl
 			}
 		};
 
-		const point& operator[](size_t i)
+		pdb_point& operator[](size_t i)
 		{
 			return points[i];
 		}
