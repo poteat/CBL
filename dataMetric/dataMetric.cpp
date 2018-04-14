@@ -298,7 +298,7 @@ int main(int argc, char* argv[])
 				summary.close();
 			}
 		}
-		else if (helix.size == 1)
+		else if (helix.size() == 1)
 		{
 			pdb cylinder = cylinderFitting(entire_map, helix);
 

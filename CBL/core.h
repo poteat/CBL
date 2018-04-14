@@ -68,6 +68,15 @@ namespace cbl
 		return pow(a.x - b.x, 2) + pow(a.y - b.y, 2) + pow(a.z - b.z, 2);
 	}
 
+	real distToLine(point &a, point &b, point &c)
+	{
+		real hypotenuse = std::sqrt(distSq(b, c));
+		real angle = sin(acos(((b.x - a.x)*(c.x - b.x) + (b.y - a.y)*(c.y - b.y) + (b.z - a.z)*(c.z - b.z))
+					/ (std::sqrt(distSq(a, b))*std::sqrt(distSq(b, c)))));
+
+		return hypotenuse * angle;
+	}
+
 	template <class T>
 	class cube
 	{
