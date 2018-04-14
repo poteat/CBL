@@ -1,0 +1,142 @@
+		/*
+		//test #1: detection using slopes
+
+		//vectors for the increment or decrement of each axis
+		std::vector<float> x, y, z;
+
+		for (int i = 0; i < structure.size() - 1; i++)
+		{
+			x.push_back(structure[i].x - structure[i + 1].x);
+			y.push_back(structure[i].y - structure[i + 1].y);
+			z.push_back(structure[i].z - structure[i + 1].z);
+		}
+
+		int switch1, switch2, switch3;
+		switch1 = 0;
+		switch2 = 0;
+		switch3 = 0;
+
+		for (int i = 0; i < x.size() - 1; i++)
+		{
+			if ((x[i] > 0 && x[i + 1] < 0) || (x[i] < 0 && x[i + 1] > 0))
+				switch1++;
+			if ((y[i] > 0 && y[i + 1] < 0) || (y[i] < 0 && y[i + 1] > 0))
+				switch2++;
+			if ((z[i] > 0 && z[i + 1] < 0) || (z[i] < 0 && z[i + 1] > 0))
+				switch3++;
+		}
+
+		//the vector with the least amount of direction changes will be the main axis
+
+		int values[3] = { switch1, switch2, switch3 };
+		std::sort(values, values + 3);
+
+		char line;
+
+		if (values[0] == switch1)
+			line = 'x';
+		if (values[0] == switch2)
+			line = 'y';
+		if (values[0] == switch3)
+			line = 'z';
+
+		std::cout << "Selected Line: " << line << std::endl;
+
+		//If a single helix folds in half, list points inbetween the two segments
+
+		if (values[0] > 0)
+		{
+			pdb halfPoints;
+			int l_shift, r_shift;
+			cbl::real x1, y1, z1;
+
+			//write any mid-points to file
+
+			if (line == 'x')
+			{
+				for (int i = 0; i < x.size() - 1; i++)
+				{
+					if ((x[i] > 0 && x[i + 1] < 0) || (x[i] < 0 && x[i + 1] > 0))
+					{
+						l_shift = i + 1;
+						r_shift = i + 1;
+
+						while (l_shift > -1 && r_shift < x.size() + 1)
+						{
+							l_shift -= 1;
+							r_shift += 1;
+
+							x1 = (structure[l_shift].x + structure[r_shift].x) / 2;
+							y1 = (structure[l_shift].y + structure[r_shift].y) / 2;
+							z1 = (structure[l_shift].z + structure[r_shift].z) / 2;
+
+							halfPoints.emplace_back(x1, y1, z1);
+						}
+					}
+				}
+			}
+
+			if (line == 'y')
+			{
+				for (int i = 0; i < y.size() - 1; i++)
+				{
+					if ((y[i] > 0 && y[i + 1] < 0) || (y[i] < 0 && y[i + 1] > 0))
+					{
+						l_shift = i + 1;
+						r_shift = i + 1;
+
+						while (l_shift > -1 && r_shift < y.size() + 1)
+						{
+							l_shift -= 1;
+							r_shift += 1;
+
+							x1 = (structure[l_shift].x + structure[r_shift].x) / 2;
+							y1 = (structure[l_shift].y + structure[r_shift].y) / 2;
+							z1 = (structure[l_shift].z + structure[r_shift].z) / 2;
+
+							halfPoints.emplace_back(x1, y1, z1);
+						}
+					}
+				}
+			}
+
+			if (line == 'z')
+			{
+				for (int i = 0; i < z.size() - 1; i++)
+				{
+					if ((z[i] > 0 && z[i + 1] < 0) || (z[i] < 0 && z[i + 1] > 0))
+					{
+						l_shift = i + 1;
+						r_shift = i + 1;
+
+						while (l_shift > -1 && r_shift < z.size() + 1)
+						{
+							l_shift -= 1;
+							r_shift += 1;
+
+							x1 = (structure[l_shift].x + structure[r_shift].x) / 2;
+							y1 = (structure[l_shift].y + structure[r_shift].y) / 2;
+							z1 = (structure[l_shift].z + structure[r_shift].z) / 2;
+
+							halfPoints.emplace_back(x1, y1, z1);
+						}
+					}
+				}
+			}
+
+			
+
+
+			std::cout << "Half Points detected" << std::endl << std::endl;
+
+			std::string halfPoints_file_path_out = pdb_file_path_in + std::to_string(i + 1) + "_halfPoints.pdb";
+
+			halfPoints.write(halfPoints_file_path_out);
+		}
+
+		else
+		{
+			std::cout << "\nNo fold detected!\n" << std::endl;
+		}
+
+		*/
