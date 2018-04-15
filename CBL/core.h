@@ -6,6 +6,7 @@
 #include <sstream>
 #include <math.h>
 #include <iterator>
+#include <experimental/filesystem>
 
 #include "Eigen/Dense"
 
@@ -431,5 +432,148 @@ namespace cbl
 		size_t period_pos = file_name.find_last_of('.');
 		file_name.erase(file_name.begin(), file_name.begin() + period_pos);
 		return file_name;
+	}
+
+	std::vector<pdb> runAxisComparisonForHelixGeneration(std::string pdb_path)
+	{
+		using path = std::experimental::filesystem::path;
+
+		// Convert relative to absolute path if necessary, using experimental std lib
+		// If there are symbolic links, we also convert those to canonical form
+		path symbolic_pdb_path = pdb_path;
+		symbolic_pdb_path = std::experimental::filesystem::canonical(symbolic_pdb_path);
+		pdb_path = symbolic_pdb_path.string();
+
+		// Assert that the extension is ".pdb"
+		assert(symbolic_pdb_path.extension() == ".pdb");
+
+		// Make output directory for results to be populated
+		path output_path = symbolic_pdb_path.parent_path().string() + "/output";
+		std::experimental::filesystem::create_directory(output_path);
+
+		// Get path stripped of file extension for input into axis-comparsion
+		path stripped_path = symbolic_pdb_path.parent_path().string() + "/" +
+			symbolic_pdb_path.stem().string();
+
+		std::string command = "leastsquare.exe \"" + stripped_path.string()
+			+ "\" \"Empty\" \"Empty\" \"Empty\"";
+
+		// Execute axis comparison
+		system(command.c_str());
+
+		// Read all files in this directory that begin with "trueHelix"
+
+		std::vector<cbl::pdb> matched_helix;
+
+		for (auto &p : std::experimental::filesystem::directory_iterator(output_path))
+		{
+			auto s = p.path().filename().string();
+
+			// If begins with "trueHelix"
+			if (s.find("trueHelix") == 0)
+			{
+				matched_helix.emplace_back(p.path().string());
+			}
+		}
+
+		// Rename output directory to something we can refer to later
+
+		path new_output_path = symbolic_pdb_path.parent_path().string() + "/"
+			+ symbolic_pdb_path.stem().string();
+
+		std::experimental::filesystem::remove_all(new_output_path);
+
+		std::experimental::filesystem::rename(output_path, new_output_path);
+
+		return matched_helix;
+	}
+
+	cbl::real applyLineData(mrc map, pdb structure, cbl::real deviation, std::string& data)
+	{
+		axis line(structure);
+
+		cbl::real deviation_value = map.map.standard_deviation();
+
+		cbl::real threshold_used = deviation_value * deviation;
+
+		std::cout << "# Deviations: " << deviation << "     Threshold Used: " << threshold_used << std::endl;
+
+		map.applyDeviationThreshold(deviation);
+		map.setHollowBoundary();
+
+		auto avg = [](std::vector<cbl::real> v)
+		{
+			cbl::real sum = 0;
+			int count = 0;
+			auto f = [&](cbl::real x) {sum += x; count += x > 0; };
+			std::for_each(v.begin(), v.end(), f);
+			sum /= count;
+			return sum;
+		};
+
+		auto variance = [](std::vector<cbl::real> v, cbl::real avg)
+		{
+			cbl::real square_sum = 0;
+			cbl::real count = 0;
+			auto f = [&](cbl::real x) {square_sum += (x > 0) * pow(avg - x, 2); count += x > 0; };
+			std::for_each(v.begin(), v.end(), f);
+			square_sum /= count;
+			if (count > 1)
+			{
+				return square_sum;
+			}
+			else
+			{
+				return (cbl::real) 0.0;
+			}
+		};
+
+		line.calcError(map, avg);
+
+		line.mergeError(1.0); // Angstroms
+
+		std::ostringstream out;
+
+		line.write(out, threshold_used);
+
+		data += out.str();
+
+		cbl::real alpha = 0.5;
+		cbl::real beta = 0.5;
+
+		cbl::real threshold_score = alpha * sqrt(variance(line.error, avg(line.error))) + beta * avg(line.error);
+
+
+		int count_zero = 0;
+		for (size_t i = 0; i < line.error.size(); i++)
+		{
+			if (line.error[i] == 0)
+			{
+				count_zero++;
+			}
+		}
+
+		std::cout << "Percentage zero: " << (cbl::real) count_zero / (cbl::real) line.error.size() << std::endl;
+
+		threshold_score *= ((cbl::real) 1.0 - (cbl::real) count_zero / (cbl::real) line.error.size());
+
+		return threshold_score;
+	}
+
+	mrc cylinderCutOut(mrc &map, pdb &structure)
+	{
+		//Chop out the density around helixes using a cylinder of 5-6 angstroms
+		cbl::real cropping_dist = (cbl::real) 5;
+
+		mrc near, far;
+
+		std::tie(near, far) = map.cylinderCrop(structure, cropping_dist);
+
+		near.minimize();
+
+		// To reduce Chimera blockiness visual effect
+		// near.pad(5);
+
+		return near;
 	}
 }
