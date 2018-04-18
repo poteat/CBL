@@ -7,6 +7,8 @@
 #include "axis.h"
 #include "mrc.h"
 
+//quantifies how well a mrc file fits a pdb file, for use with real cases
+
 using namespace cbl;
 
 cbl::real applyLineData(mrc map, pdb structure, cbl::real deviation, std::string& data)
