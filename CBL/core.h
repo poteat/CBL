@@ -63,6 +63,11 @@ namespace cbl
 		real x, y, z;
 	};
 
+	real sign(real x)
+	{
+		return (real)(x > 0.0) - (x < 0.0);
+	}
+
 	real distSq(point &a, point &b)
 	{
 		return pow(a.x - b.x, 2) + pow(a.y - b.y, 2) + pow(a.z - b.z, 2);
@@ -75,6 +80,45 @@ namespace cbl
 					/ (std::sqrt(distSq(a, b))*std::sqrt(distSq(b, c)))));
 
 		return hypotenuse * angle;
+	}
+
+	real angleBetweenTwoVectors(real x1, real y1, real z1, real x2, real y2, real z2)
+	{
+		float l1 = sqrt(pow(x1, 2) + pow(y1, 2) + pow(z1, 2));
+		float l2 = sqrt(pow(x2, 2) + pow(y2, 2) + pow(z2, 2));
+
+		float dot = x1 * x2 + y1 * y2 + z1 * z2;
+
+		float ang = acos(dot / l1 / l2);
+
+		// Twist direction calculation
+
+		float cross_x = y1 * z2 - z1 * y2;
+		float cross_y = z1 * x2 - x1 * z2;
+		float cross_z = x1 * y2 - y1 * x2;
+
+		float delta_x = x1 - x2;
+		float delta_y = y1 - y2;
+		float delta_z = z1 - z2;
+
+		float dot_dir = cross_x * delta_x + cross_y * delta_y + cross_z * delta_z;
+
+		float dir = sign(dot_dir);
+
+		return dir * ang;
+	}
+
+	real angleBetweenThreePoints(point &a, point &b, point &c)
+	{
+		real x1 = b.x - a.x;
+		real y1 = b.y - a.y;
+		real z1 = b.z - b.z;
+
+		real x2 = c.x - b.x;
+		real y2 = c.y - b.y;
+		real z2 = c.z - b.z;
+
+		return angleBetweenTwoVectors(x1, y1, z1, x2, y2, z2);
 	}
 
 	template <class T>
