@@ -89,7 +89,7 @@ cbl::pdb innerCylinder(pdb &structure)
 	pdb cylinder;
 	cbl::real x, y, z;
 
-	for (int i = 0; i < structure.size(); i++)
+	for (size_t i = 0; i < structure.size(); i++)
 	{
 		x = structure[i].x;
 		y = structure[i].y;
@@ -117,7 +117,7 @@ cbl::pdb outerCylinder(mrc &map, pdb &structure, float threshold)
 	maxy = 0;
 	maxz = 0;
 
-	for (int i = 0; i < structure.size(); i++)
+	for (size_t i = 0; i < structure.size(); i++)
 	{
 		x = structure[i].x;
 		y = structure[i].y;
@@ -140,11 +140,11 @@ cbl::pdb outerCylinder(mrc &map, pdb &structure, float threshold)
 	}
 
 	cbl::real xdenominator, ydenominator, zdenominator;
-	xdenominator = .5*((maxx - minx)*(maxx - minx));
-	ydenominator = .5*((maxy - miny)*(maxy - miny));
-	zdenominator = .5*((maxz - minz)*(maxz - minz));
+	xdenominator = (real)0.5*((maxx - minx)*(maxx - minx));
+	ydenominator = (real)0.5*((maxy - miny)*(maxy - miny));
+	zdenominator = (real)0.5*((maxz - minz)*(maxz - minz));
 
-	for (int i = 0; i < structure.size(); i++)
+	for (size_t i = 0; i < structure.size(); i++)
 	{
 		x = structure[i].x;
 		y = structure[i].y;
