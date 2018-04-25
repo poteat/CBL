@@ -227,7 +227,7 @@ namespace cbl
 				size_t k = (size_t)std::round(vox.z);
 				real d = vox.d;
 
-				this->operator()(i, j, k) = d;
+				this.operator()(i, j, k) = d;
 			}
 		}
 

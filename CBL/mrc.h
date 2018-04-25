@@ -109,7 +109,7 @@ namespace cbl
 		{
 			assert(map.count() > 0 && "Attempted to write MRC file with no positive density");
 
-			updateHeaderMetadata();
+			updateHeaderMinMax();
 
 			std::ofstream file(file_name, std::ios::binary);
 
@@ -129,7 +129,7 @@ namespace cbl
 			file.close();
 		}
 
-		void updateHeaderMetadata()
+		void updateHeaderMinMax()
 		{
 			// Update min, mean, and max density values
 
