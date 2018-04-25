@@ -100,7 +100,6 @@
     <ClInclude Include="off.h" />
     <ClInclude Include="pdb.h" />
     <ClInclude Include="plane.h" />
-    <ClInclude Include="surface.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
