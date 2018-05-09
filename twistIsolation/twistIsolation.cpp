@@ -67,8 +67,22 @@ std::vector<pdb> runAxisComparisonForHelixGeneration(std::string pdb_path)
 
 int main(int argc, char* argv[])
 {
-	int num_args = 1;
-	assert(argc == num_args + 1 && "Incorrect num arguments, 1 input: pdb");
+	if (argc > 2)
+	{
+		assert("Incorrect num arguments, 2 inputs: pdb, (optional: bool value on whether to run testing)");
+		return 1;
+	}
+
+	bool runTesting;
+
+	if (argc == 2)
+	{
+		runTesting = argv[2];
+	}
+	else
+	{
+		runTesting = false;
+	}
 
 	std::string pdb_file_path_in = argv[1];
 	std::vector<pdb> allstructures = runAxisComparisonForHelixGeneration(pdb_file_path_in);
@@ -336,6 +350,17 @@ int main(int argc, char* argv[])
 	}
 
 	std::cout << "\nAll Isolation points written to file: " << pointFile << std::endl;
+
+	if (runTesting = true)
+	{
+		//experimental methods for creating 3-d shapes to fit helices
+
+
+
+
+
+
+	}
 
 	std::cout << std::endl;
 
