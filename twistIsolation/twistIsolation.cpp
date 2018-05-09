@@ -102,6 +102,9 @@ int main(int argc, char* argv[])
 
 	}
 
+	std::ofstream pointList;
+	std::string pointFile = pdb_file_path_in + "_AllPoints.txt";
+	pointList.open(pointFile);
 	std::vector<pdb> finalPoints;
 	finalPoints.resize(allstructures.size());
 
@@ -289,9 +292,12 @@ int main(int argc, char* argv[])
 		z1 = (structure1[index1].z + structure2[index2].z) / 2;
 
 		//saves the points based on the structure that they belong to
+		pointList << x1 << "\t" << y1 << "\t" << z1 << std::endl;
 		finalPoints[i].emplace_back(x1, y1, z1);
 		finalPoints[strand].emplace_back(x1, y1, z1);
 	}
+
+	pointList.close();
 
 	//Finally, output the generated half-points based on which structure they belong to
 
@@ -328,6 +334,8 @@ int main(int argc, char* argv[])
 			std::cout << "\nNo other structures in PDB detected..." << std::endl;
 		}
 	}
+
+	std::cout << "\nAll Isolation points written to file: " << pointFile << std::endl;
 
 	std::cout << std::endl;
 
