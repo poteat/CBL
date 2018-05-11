@@ -88,7 +88,7 @@ int main(int argc, char* argv[])
 	std::vector<pdb> allstructures = runAxisComparisonForHelixGeneration(pdb_file_path_in);
 	size_t period_pos = pdb_file_path_in.find_last_of('.');
 	pdb_file_path_in.resize(period_pos);
-	std::vector<std::vector<int>> vertices;
+	std::vector<std::vector<size_t>> vertices;
 	vertices.resize(allstructures.size());
 
 	size_t errors = 0;
