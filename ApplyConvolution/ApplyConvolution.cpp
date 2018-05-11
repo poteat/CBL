@@ -8,8 +8,9 @@ using namespace cbl;
 
 int main(int argc, char *argv[])
 {
-	// Confirm we have correct number of arguments (The two files)
-	assert(argc == 2 && "Program must take in one argument, .mrc file");
+	// Confirm we have correct number of arguments (The one map to be convolved)
+	int num_args = 1;
+	assert(argc == num_args + 1 && "Program must take in one argument, .mrc file");
 	std::string mrc_file(argv[1]);
 
 	mrc map(mrc_file);
