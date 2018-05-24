@@ -526,6 +526,9 @@ namespace cbl
 								min_dist = dist_sq;
 								min_index = m;
 							}
+							
+							if(min_dist < cropping_dist)
+								m = pdb.size()
 						}
 
 						min_dist = sqrt(min_dist); // Get actual distance (not squared)
