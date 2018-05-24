@@ -11,58 +11,87 @@
 
 using namespace cbl;
 
-std::vector<pdb> runAxisComparisonForHelixGeneration(std::string pdb_path)
+std::vector<pdb> runAxisComparisonForHelixGeneration(std::string pdb_path, bool secondRun)
 {
-	using path = std::experimental::filesystem::path;
-
-	// Convert relative to absolute path if necessary, using experimental std lib
-	// If there are symbolic links, we also convert those to canonical form
-	path symbolic_pdb_path = pdb_path;
-	symbolic_pdb_path = std::experimental::filesystem::canonical(symbolic_pdb_path);
-	pdb_path = symbolic_pdb_path.string();
-
-	// Assert that the extension is ".pdb"
-	assert(symbolic_pdb_path.extension() == ".pdb");
-
-	// Make output directory for results to be populated
-	path output_path = symbolic_pdb_path.parent_path().string() + "/output";
-	std::experimental::filesystem::create_directory(output_path);
-
-	// Get path stripped of file extension for input into axis-comparsion
-	path stripped_path = symbolic_pdb_path.parent_path().string() + "/" +
-		symbolic_pdb_path.stem().string();
-
-	std::string command = "leastsquare.exe \"" + stripped_path.string()
-		+ "\" \"Empty\" \"Empty\" \"Empty\"";
-
-	// Execute axis comparison
-	system(command.c_str());
-
-	// Read all files in this directory that begin with "trueHelix"
-
-	std::vector<cbl::pdb> structures;
-
-	for (auto &p : std::experimental::filesystem::directory_iterator(output_path))
+	if (secondRun == false)
 	{
-		auto s = p.path().filename().string();
+		using path = std::experimental::filesystem::path;
 
-		// If begins with "trueHelix"
-		if (s.find("trueHelix") == 0 || s.find("trueSheet") == 0)
+		// Convert relative to absolute path if necessary, using experimental std lib
+		// If there are symbolic links, we also convert those to canonical form
+		path symbolic_pdb_path = pdb_path;
+		symbolic_pdb_path = std::experimental::filesystem::canonical(symbolic_pdb_path);
+		pdb_path = symbolic_pdb_path.string();
+
+		// Assert that the extension is ".pdb"
+		assert(symbolic_pdb_path.extension() == ".pdb");
+
+		// Make output directory for results to be populated
+		path output_path = symbolic_pdb_path.parent_path().string() + "/output";
+		std::experimental::filesystem::create_directory(output_path);
+
+		// Get path stripped of file extension for input into axis-comparsion
+		path stripped_path = symbolic_pdb_path.parent_path().string() + "/" +
+			symbolic_pdb_path.stem().string();
+
+		std::string command = "leastsquare.exe \"" + stripped_path.string()
+			+ "\" \"Empty\" \"Empty\" \"Empty\"";
+
+		// Execute axis comparison
+		system(command.c_str());
+
+		// Read all files in this directory that begin with "trueHelix"
+
+		std::vector<cbl::pdb> structures;
+
+		for (auto &p : std::experimental::filesystem::directory_iterator(output_path))
 		{
-			structures.emplace_back(p.path().string());
+			auto s = p.path().filename().string();
+
+			// If begins with "trueHelix"
+			if (s.find("trueHelix") == 0 || s.find("trueSheet") == 0)
+			{
+				structures.emplace_back(p.path().string());
+			}
 		}
+
+		// Rename output directory to something we can refer to later
+
+		path new_output_path = symbolic_pdb_path.parent_path().string() + "/"
+			+ symbolic_pdb_path.stem().string();
+
+		std::experimental::filesystem::remove_all(new_output_path);
+
+		std::experimental::filesystem::rename(output_path, new_output_path);
+
+		return structures;
 	}
+	else
+	{
+		using path = std::experimental::filesystem::path;
+		path symbolic_pdb_path = pdb_path;
+		symbolic_pdb_path = std::experimental::filesystem::canonical(symbolic_pdb_path);
+		pdb_path = symbolic_pdb_path.string();
+		assert(symbolic_pdb_path.extension() == ".pdb");
+		path output_path = symbolic_pdb_path.parent_path().string() + "/output";
+		path new_output_path = symbolic_pdb_path.parent_path().string() + "/"
+			+ symbolic_pdb_path.stem().string();
 
-	// Rename output directory to something we can refer to later
+		std::vector<cbl::pdb> helices;
 
-	path new_output_path = symbolic_pdb_path.parent_path().string() + "/"
-		+ symbolic_pdb_path.stem().string();
+		for (auto &p : std::experimental::filesystem::directory_iterator(new_output_path))
+		{
+			auto s = p.path().filename().string();
 
-	std::experimental::filesystem::remove_all(new_output_path);
+			// If begins with "trueHelix"
+			if (s.find("trueHelix") == 0)
+			{
+				helices.emplace_back(p.path().string());
+			}
+		}
 
-	std::experimental::filesystem::rename(output_path, new_output_path);
-
-	return structures;
+		return helices;
+	}
 }
 
 int main(int argc, char* argv[])
@@ -74,6 +103,7 @@ int main(int argc, char* argv[])
 	}
 
 	bool runTesting;
+	bool secondRun = false;
 
 	if (argc == 2)
 	{
@@ -85,7 +115,7 @@ int main(int argc, char* argv[])
 	}
 
 	std::string pdb_file_path_in = argv[1];
-	std::vector<pdb> allstructures = runAxisComparisonForHelixGeneration(pdb_file_path_in);
+	std::vector<pdb> allstructures = runAxisComparisonForHelixGeneration(pdb_file_path_in, secondRun);
 	size_t period_pos = pdb_file_path_in.find_last_of('.');
 	pdb_file_path_in.resize(period_pos);
 	std::vector<std::vector<size_t>> vertices;
@@ -354,12 +384,43 @@ int main(int argc, char* argv[])
 	if (runTesting = true)
 	{
 		//experimental methods for creating 3-d shapes to fit helices
+		secondRun = true;
+		std::vector<pdb> helices = runAxisComparisonForHelixGeneration(argv[1], secondRun);
+		std::vector<pdb> helixFit;
+		helixFit.resize(helices.size());
 
+		for (size_t n = 0; n < helices.size(); n++)
+		{
+			pdb helix = helices[n];
 
+			for (size_t i = 0; i < helices[n].size(); i++)
+			{
+				if (helix.size() == 1)
+				{
+					//create a sphere around the point
 
+				}
+				else if ((i == 0) && (helix.size() != 1))
+				{
+					//create half a sphere around the point, pointing away from the next point
 
+				}
+				else if ((i == helix.size() - 1) && (helix.size() != 1))
+				{
+					//create a half sphere pointing away from the previous point and also create a cylinder to the previous point
 
+				}
+				else
+				{
+					//create a cylinder from the current point to the previous point
+					cbl::real x, y, z;
 
+					//helixFit[n].emplace_back()
+				}
+			}
+
+			helices[n] = helix;
+		}
 	}
 
 	std::cout << std::endl;
